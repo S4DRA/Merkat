@@ -31,6 +31,14 @@ export async function directRequest<T>(
 }
 export function directError(error: unknown) {
   if (error instanceof DirectRequestError) {
+    if (error.code === "PAYMENTS_EXCEED_TOTAL")
+      return "Correct the venue payment records before reducing the total.";
+    if (error.code === "TAB_ALREADY_OPEN")
+      return "This conversation already has an open tab. Open it from the activity list.";
+    if (error.code === "PENDING_CONFIRMATIONS")
+      return "Confirm or cancel pending shared orders before closing.";
+    if (error.code === "INVALID_CREDENTIALS")
+      return "That password or recovery code didn't match.";
     if (error.code === "NOT_FOUND") return "Not found.";
     if (error.code === "INVALID_REQUEST")
       return "Check the details and try again.";
@@ -42,7 +50,7 @@ export function directError(error: unknown) {
       return `Try again in ${error.retryAfter || 60}s.`;
     if (error.code === "UNAUTHORIZED") return "Sign in again.";
     if (error.code === "SUBMISSION_CONFLICT")
-      return "Message changed. Send it again.";
+      return "This activity changed. Refresh and try again.";
     if (error.code === "FORBIDDEN") return "You don’t have permission.";
     if (error.code === "INTERACTION_UNAVAILABLE")
       return "Messaging is unavailable for this conversation.";

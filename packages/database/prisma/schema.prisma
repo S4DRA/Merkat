@@ -43,6 +43,13 @@ model User {
   blockedBy             UserBlock[]          @relation("Blocked")
   reports               SafetyReport[]       @relation("Reporter")
   reportedBy            SafetyReport[]       @relation("ReportedUser")
+  avatar                ProfileAvatar?
+  settings              UserSettings?
+  createdTabs           TabSession[]
+  reminderRows          PlanReminder[]
+  notifications         Notification[]
+  recoveryCodes         RecoveryCode[]
+  pushSubscriptions     PushSubscription[]
 }
 
 model Profile {
@@ -53,6 +60,25 @@ model Profile {
   bio         String   @default("") @db.VarChar(160)
   avatarRef   String?  @db.VarChar(512)
   updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model ProfileAvatar {
+  userId    String   @id @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  bytes     Bytes
+  version   String   @db.Char(64)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model UserSettings {
+  userId           String  @id @db.Uuid
+  user             User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  theme            String  @default("SYSTEM") @db.VarChar(8)
+  reduceMotion     Boolean @default(false)
+  largeText        Boolean @default(false)
+  remindersEnabled Boolean @default(true)
+  pushEnabled      Boolean @default(false)
+  timezone         String  @default("Europe/Istanbul") @db.VarChar(80)
 }
 
 model ExternalIdentity {
@@ -75,6 +101,7 @@ model Session {
   createdAt DateTime  @default(now()) @db.Timestamptz(3)
   expiresAt DateTime  @db.Timestamptz(3)
   revokedAt DateTime? @db.Timestamptz(3)
+  pushSubscriptions PushSubscription[]
 
   @@index([userId, revokedAt])
   @@index([expiresAt])
@@ -116,6 +143,24 @@ model Plan {
   cancelled      Boolean           @default(false)
   createdAt      DateTime          @default(now()) @db.Timestamptz(3)
   participants   PlanParticipant[]
+  directId       String? @db.Uuid
+  direct         DirectConversation? @relation("PlanDirect",fields:[directId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  groupId        String? @db.Uuid
+  group          ChatGroup? @relation("PlanGroup",fields:[groupId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  channelId      String? @db.Uuid
+  channel        GroupChannel? @relation("PlanChannel",fields:[groupId,channelId],references:[groupId,id],onDelete:Restrict,onUpdate:Restrict)
+  clientId       String? @db.Uuid
+  submissionHash String? @db.Char(64)
+  timezone       String @default("Europe/Istanbul") @db.VarChar(80)
+  version        Int @default(1)
+  directMessages DirectMessage[]
+  groupMessages GroupMessage[]
+  reminders PlanReminder[]
+  notifications Notification[]
+
+  @@unique([ownerId, clientId])
+  @@index([directId, startsAt])
+  @@index([groupId, startsAt])
 
   @@index([ownerId, startsAt])
 }
@@ -126,6 +171,7 @@ model PlanParticipant {
   plan     Plan         @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   response PlanResponse @default(INVITED)
+  subscribed Boolean @default(false)
 
   @@id([planId, userId])
   @@index([userId, planId])
@@ -142,6 +188,8 @@ model DirectConversation {
   activityAt   DateTime            @default(now()) @db.Timestamptz(3)
   participants DirectParticipant[]
   messages     DirectMessage[]
+  plans        Plan[] @relation("PlanDirect")
+  tabs         TabSession[] @relation("TabDirect")
 
   @@unique([firstUserId, secondUserId])
   @@index([secondUserId])
@@ -172,6 +220,10 @@ model DirectMessage {
   createdAt      DateTime           @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
   conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   sender         DirectParticipant  @relation(fields: [conversationId, senderId], references: [conversationId, userId], onDelete: Cascade, onUpdate: Restrict)
+  planId String? @db.Uuid
+  plan Plan? @relation(fields: [planId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  tabId String? @db.Uuid
+  tab TabSession? @relation(fields: [tabId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   @@unique([conversationId, sequence])
   @@unique([conversationId, senderId, clientId])
@@ -240,6 +292,8 @@ model ChatGroup {
   channels    GroupChannel[]
   invitations GroupInvitation[]
   reports     SafetyReport[]
+  plans       Plan[] @relation("PlanGroup")
+  tabs        TabSession[] @relation("TabGroup")
 
   @@unique([createdById, clientId])
   @@index([ownerId])
@@ -274,6 +328,8 @@ model GroupChannel {
   group        ChatGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Restrict)
   messages     GroupMessage[]
   readStates   GroupReadState[]
+  plans        Plan[] @relation("PlanChannel")
+  tabs         TabSession[] @relation("TabChannel")
 
   @@unique([groupId, id])
   @@unique([groupId, clientId])
@@ -289,6 +345,10 @@ model GroupMessage {
   clientId  String         @db.Uuid
   sequence  Int
   text      String         @db.VarChar(4000)
+  planId String? @db.Uuid
+  plan Plan? @relation(fields: [planId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  tabId String? @db.Uuid
+  tab TabSession? @relation(fields: [tabId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   createdAt DateTime       @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
   replyToId String?        @db.Uuid
   channel   GroupChannel   @relation(fields: [groupId, channelId], references: [groupId, id], onDelete: Cascade, onUpdate: Restrict)
@@ -364,4 +424,97 @@ model SafetyReport {
   @@index([targetUserId])
   @@index([targetGroupId])
   @@index([createdAt, id])
+}
+
+model TabSession {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdBy String @db.Uuid
+  creator User @relation(fields:[createdBy],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  clientId String @db.Uuid
+  directId String? @db.Uuid
+  direct DirectConversation? @relation("TabDirect",fields:[directId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  groupId String? @db.Uuid
+  group ChatGroup? @relation("TabGroup",fields:[groupId],references:[id],onDelete:Restrict,onUpdate:Restrict)
+  channelId String? @db.Uuid
+  channel GroupChannel? @relation("TabChannel",fields:[groupId,channelId],references:[groupId,id],onDelete:Restrict,onUpdate:Restrict)
+  title String @db.VarChar(100)
+  currency String @default("TRY") @db.Char(3)
+  state Json
+  version Int @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  closedAt DateTime? @db.Timestamptz(3)
+  directMessages DirectMessage[]
+  groupMessages GroupMessage[]
+  @@unique([createdBy,clientId])
+  @@index([directId,createdAt])
+  @@index([groupId,createdAt])
+}
+
+model PlanReminder {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  planId String @db.Uuid
+  plan Plan @relation(fields:[planId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  version Int
+  hoursBefore Int
+  dueAt DateTime @db.Timestamptz(3)
+  state String @default("PENDING") @db.VarChar(12)
+  @@unique([planId,userId,version,hoursBefore])
+  @@index([state,dueAt])
+}
+
+model Notification {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  planId String? @db.Uuid
+  plan Plan? @relation(fields:[planId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  dedupeKey String @unique @db.VarChar(200)
+  title String @db.VarChar(160)
+  body String @db.VarChar(400)
+  href String @db.VarChar(300)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  readAt DateTime? @db.Timestamptz(3)
+  deliveries PushDelivery[]
+  @@index([userId,createdAt(sort:Desc),id(sort:Desc)])
+}
+
+model RecoveryCode {
+  codeHash String @id @db.Char(64)
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  usedAt DateTime? @db.Timestamptz(3)
+  @@index([userId,usedAt])
+}
+
+model PushSubscription {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  sessionId String @db.Uuid
+  session Session @relation(fields:[sessionId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  endpoint String @unique @db.VarChar(2048)
+  p256dh String @db.VarChar(128)
+  auth String @db.VarChar(32)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  deliveries PushDelivery[]
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model PushDelivery {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  notificationId String @db.Uuid
+  notification Notification @relation(fields:[notificationId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  subscriptionId String @db.Uuid
+  subscription PushSubscription @relation(fields:[subscriptionId],references:[id],onDelete:Cascade,onUpdate:Restrict)
+  state String @default("PENDING") @db.VarChar(12)
+  attempts Int @default(0)
+  availableAt DateTime @default(now()) @db.Timestamptz(3)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  providerStatus Int?
+  @@unique([notificationId,subscriptionId])
+  @@index([state,availableAt])
 }

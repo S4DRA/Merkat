@@ -19,7 +19,9 @@ const conversationInclude = {
       user: {
         select: {
           status: true,
-          profile: { select: { username: true, displayName: true } },
+          profile: {
+            select: { username: true, displayName: true, avatarRef: true },
+          },
         },
       },
     },
@@ -31,6 +33,11 @@ type Conversation = Prisma.DirectConversationGetPayload<{
 }>;
 type Message = Prisma.DirectMessageGetPayload<Record<string, never>>;
 const messageView = (m: Message): DirectMessageView => ({
+  feature: m.planId
+    ? { kind: "EVENT", id: m.planId }
+    : m.tabId
+      ? { kind: "TAB", id: m.tabId }
+      : null,
   id: m.id,
   conversationId: m.conversationId,
   senderId: m.senderId,
@@ -49,6 +56,7 @@ function view(c: Conversation, userId: string): DirectConversationView {
       id: peer.userId,
       username: peer.user.profile?.username ?? null,
       displayName: peer.user.profile?.displayName ?? null,
+      avatarRef: peer.user.profile?.avatarRef ?? null,
     },
     activityAt: c.activityAt.toISOString(),
     lastSequence: c.lastSequence,

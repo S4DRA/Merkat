@@ -20,6 +20,7 @@ export {
   isAuthenticationError,
   isAuthenticationLimitError,
 } from "./authentication.js";
+export { splitMinorUnits, tabSummary, parseMinorUnits } from "./ledger.js";
 export {
   MessagingService,
   MessagingError,

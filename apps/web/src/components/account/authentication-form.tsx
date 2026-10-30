@@ -249,7 +249,7 @@ export function AuthenticationForm({
         )}
         {register && (
           <p id="recovery-note" className="auth-recovery">
-            Lost passwords can’t be recovered.
+            Optional recovery codes are available in Settings after joining.
           </p>
         )}
         <div className="auth-feedback" aria-live="polite">
@@ -275,6 +275,11 @@ export function AuthenticationForm({
       >
         {register ? "Sign in" : "Create account"}
       </Link>
+      {!register && (
+        <Link className="space-link" href="/recover">
+          Use a recovery code
+        </Link>
+      )}
     </>
   );
 }

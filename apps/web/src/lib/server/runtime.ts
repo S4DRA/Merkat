@@ -18,6 +18,11 @@ import {
   createFriendshipRepository,
   createGroupRepository,
   createPrivacyRepository,
+  createProfileRepository,
+  createCalendarRepository,
+  createTabRepository,
+  createSecurityRepository,
+  createPushRepository,
 } from "@merkat/database";
 import { authenticationSecret } from "./authentication-environment";
 
@@ -25,8 +30,14 @@ function createServices() {
   const database = createDatabase(process.env);
   const accounts = new AccountService(createAccountRepository(database));
   let authentication: AuthenticationService | undefined;
+  let security: ReturnType<typeof createSecurityRepository> | undefined;
   return {
     database,
+    profiles: createProfileRepository(database),
+    calendar: createCalendarRepository(database),
+    tabs: createTabRepository(database),
+    security: () => (security ??= createSecurityRepository(database)),
+    push: createPushRepository(database),
     accounts,
     plans: new PlanService(accounts, createPlanRepository(database)),
     messaging: new MessagingService(createMessagingRepository(database)),

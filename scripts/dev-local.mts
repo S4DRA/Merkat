@@ -87,27 +87,29 @@ async function settings(): Promise<Settings> {
 }
 let database: EmbeddedPostgres | undefined;
 let web: ChildProcess | undefined;
+let worker: ChildProcess | undefined;
 let running = false;
 let closing: Promise<void> | undefined;
 let releaseRuntime: (() => Promise<void>) | undefined;
 async function close() {
   closing ??= (async () => {
-    if (web?.pid && web.exitCode === null) {
-      if (process.platform === "win32") {
-        try {
-          await promisify(execFile)("taskkill", [
-            "/PID",
-            String(web.pid),
-            "/T",
-            "/F",
-          ]);
-        } catch {
-          console.error(
-            "Local web process already stopped or could not be stopped.",
-          );
-        }
-      } else web.kill("SIGTERM");
-    }
+    for (const child of [web, worker])
+      if (child?.pid && child.exitCode === null) {
+        if (process.platform === "win32") {
+          try {
+            await promisify(execFile)("taskkill", [
+              "/PID",
+              String(child.pid),
+              "/T",
+              "/F",
+            ]);
+          } catch {
+            console.error(
+              "Local process already stopped or could not be stopped.",
+            );
+          }
+        } else child.kill("SIGTERM");
+      }
     if (database && running) {
       await database.stop();
       running = false;
@@ -206,6 +208,27 @@ try {
   console.log(
     "Supabase live updates need the separate staging setup. Local accounts and persistent messaging work without it.",
   );
+  worker = spawn(
+    process.execPath,
+    [
+      "--conditions=react-server",
+      "--import",
+      "tsx",
+      resolve("apps/worker/src/index.ts"),
+    ],
+    {
+      cwd: resolve("."),
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        NODE_ENV: "development",
+        DATABASE_URL: connection,
+        MERKAT_PUSH_PUBLIC_KEY: "",
+        MERKAT_PUSH_PRIVATE_KEY: "",
+        MERKAT_PUSH_SUBJECT: "",
+      },
+    },
+  );
   web = spawn(
     process.execPath,
     [
@@ -235,10 +258,15 @@ try {
     process.once(signal, () => {
       void close().then(() => process.exit(0));
     });
-  exitCode = await new Promise<number>((resolve, reject) => {
-    web!.once("error", reject);
-    web!.once("exit", (code) => resolve(code ?? 1));
-  });
+  exitCode = await Promise.race(
+    [web, worker].map(
+      (child) =>
+        new Promise<number>((resolve, reject) => {
+          child!.once("error", reject);
+          child!.once("exit", (code) => resolve(code ?? 1));
+        }),
+    ),
+  );
 } catch (error) {
   console.error(
     error instanceof Error

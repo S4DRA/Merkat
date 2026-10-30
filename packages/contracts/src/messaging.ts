@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { FeatureReference } from "./collaboration.js";
 
 export const MESSAGE_MAX_LENGTH = 4000;
 const sequence = z.number().int().min(0).max(2147483647);
@@ -62,6 +63,7 @@ export type MessagePageInput = z.infer<typeof messagePageSchema>;
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
 export type MessageReceiptInput = z.infer<typeof messageReceiptSchema>;
 export type DirectMessageView = {
+  feature?: FeatureReference | null;
   id: string;
   conversationId: string;
   senderId: string;
@@ -74,7 +76,12 @@ export type DirectConversationView = {
   canSend?: boolean;
   blockedByYou?: boolean;
   id: string;
-  peer: { id: string; username: string | null; displayName: string | null };
+  peer: {
+    id: string;
+    username: string | null;
+    displayName: string | null;
+    avatarRef?: string | null;
+  };
   latestMessage: DirectMessageView | null;
   activityAt: string;
   lastSequence: number;

@@ -38,6 +38,11 @@ import {
 import { useDirectRealtime } from "./use-direct-realtime";
 import { GroupInboxEntries } from "../groups/group-list";
 import { UserSafetyActions } from "../privacy-controls";
+import { ProfilePreview } from "../account/profile-preview";
+import {
+  ConversationFeatures,
+  FeatureCard,
+} from "../plans/conversation-features";
 
 type Thread = {
   conversation: DirectConversationView;
@@ -189,11 +194,13 @@ export function ChatsWorkspace({ userId }: { userId: string }) {
     };
     window.addEventListener("focus", focus);
     window.addEventListener("online", focus);
+    window.addEventListener("merkat:feature-change", focus);
     document.addEventListener("visibilitychange", focus);
     return () => {
       controller.abort();
       window.removeEventListener("focus", focus);
       window.removeEventListener("online", focus);
+      window.removeEventListener("merkat:feature-change", focus);
       document.removeEventListener("visibilitychange", focus);
     };
   }, [refresh, unauthorized]);
@@ -346,6 +353,7 @@ export function ChatsWorkspace({ userId }: { userId: string }) {
             >
               <Avatar
                 name={c.peer.displayName ?? c.peer.username ?? "Person"}
+                src={c.peer.avatarRef ?? undefined}
               />
               <span className="direct-list-copy">
                 <span className="direct-list-line">
@@ -809,6 +817,12 @@ function ThreadView({
   return (
     <section className="direct-thread" aria-label="Conversation">
       <header className="direct-thread-heading">
+        {thread && (
+          <ConversationFeatures
+            scope={{ kind: "DM", id: thread.conversation.id }}
+            userId={userId}
+          />
+        )}
         <Link
           href="/chats"
           scroll={false}
@@ -818,7 +832,11 @@ function ThreadView({
           <ArrowLeft size={22} />
         </Link>
         {peer && (
-          <Avatar name={peer.displayName ?? peer.username ?? "Person"} />
+          <ProfilePreview
+            userId={peer.id}
+            name={peer.displayName ?? peer.username ?? "Person"}
+            avatarRef={peer.avatarRef}
+          />
         )}
         <div>
           <h2>{peer?.displayName ?? peer?.username ?? "Conversation"}</h2>
@@ -905,7 +923,11 @@ function ThreadView({
               data-sequence={message.sequence}
               aria-label={`${own ? "You" : (peer?.displayName ?? peer?.username)}, ${stamp(message.createdAt)}`}
             >
-              <p>{message.text}</p>
+              {message.feature ? (
+                <FeatureCard reference={message.feature} userId={userId} />
+              ) : (
+                <p>{message.text}</p>
+              )}
               <footer>
                 <time
                   dateTime={message.createdAt}
@@ -973,6 +995,24 @@ function ThreadView({
         >
           New messages <ArrowDown size={16} />
         </button>
+      )}
+      {thread && /^@(calendar|event)\b/i.test(draft.trim()) && (
+        <Button
+          className="calendar-command"
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("merkat:calendar-command", {
+                detail: JSON.stringify({
+                  kind: "DM",
+                  id: thread.conversation.id,
+                }),
+              }),
+            );
+            setDraft("");
+          }}
+        >
+          Open conversation plans · create, share or view
+        </Button>
       )}
       <form className="direct-composer" method="post" onSubmit={send}>
         <label className="visually-hidden" htmlFor="direct-message">

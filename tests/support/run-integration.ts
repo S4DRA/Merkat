@@ -21,6 +21,7 @@ try {
       "tests/integration/database-connections.test.ts",
       "tests/integration/list-http-recovery.test.ts",
       "tests/integration/local-runtime.test.ts",
+      "tests/integration/collaboration.test.ts",
     ],
     {
       stdio: "inherit",

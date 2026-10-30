@@ -96,9 +96,14 @@ export function createAccountRepository(db: PrismaClient): AccountRepository {
       }
     },
     async revokeSession(tokenHash, now) {
-      await db.session.updateMany({
-        where: { tokenHash, revokedAt: null },
-        data: { revokedAt: now },
+      await db.$transaction(async (tx) => {
+        await tx.session.updateMany({
+          where: { tokenHash, revokedAt: null },
+          data: { revokedAt: now },
+        });
+        await tx.pushSubscription.deleteMany({
+          where: { session: { tokenHash } },
+        });
       });
     },
     async rotateSession(oldHash, newHash, now) {
@@ -112,12 +117,16 @@ export function createAccountRepository(db: PrismaClient): AccountRepository {
           data: { revokedAt: now },
         });
         if (result.count !== 1) return null;
-        await tx.session.create({
+        const replacement = await tx.session.create({
           data: {
             tokenHash: newHash,
             userId: session.userId,
             expiresAt: session.expiresAt,
           },
+        });
+        await tx.pushSubscription.updateMany({
+          where: { sessionId: session.id },
+          data: { sessionId: replacement.id },
         });
         return session.expiresAt;
       });

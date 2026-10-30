@@ -7,8 +7,10 @@ import {
   isMessagingError,
   isFriendshipError,
   isSocialError,
+  hashSessionToken,
 } from "@merkat/backend";
-import { sessionCookieName } from "@merkat/contracts";
+import { sessionCookieName, appearanceSchema } from "@merkat/contracts";
+import { z } from "zod";
 import { readWebEnvironment } from "../environment";
 import { getServices, type Services } from "./runtime";
 import { authenticationSource } from "./authentication-environment";
@@ -27,6 +29,32 @@ const methods: Record<string, readonly string[]> = {
   "auth/logout": ["POST"],
   "auth/session/rotate": ["POST"],
   "account/profile": ["PATCH"],
+  "profiles/view": ["POST"],
+  "preferences/get": ["POST"],
+  "preferences/update": ["POST"],
+  "calendar/list": ["POST"],
+  "calendar/conversation": ["POST"],
+  "calendar/detail": ["POST"],
+  "calendar/create": ["POST"],
+  "calendar/respond": ["POST"],
+  "calendar/edit": ["POST"],
+  "calendar/cancel": ["POST"],
+  "calendar/share": ["POST"],
+  "notifications/list": ["POST"],
+  "notifications/read": ["POST"],
+  "security/status": ["POST"],
+  "security/recovery-codes": ["POST"],
+  "security/change-password": ["POST"],
+  "security/recover": ["POST"],
+  "push/config": ["POST"],
+  "push/subscribe": ["POST"],
+  "push/remove": ["POST"],
+  "push/status": ["POST"],
+  "tabs/list": ["POST"],
+  "tabs/detail": ["POST"],
+  "tabs/create": ["POST"],
+  "tabs/act": ["POST"],
+  "tabs/context": ["POST"],
   "auth/phone/start": ["POST"],
   "auth/phone/verify": ["POST"],
   plans: ["GET", "POST", "PATCH"],
@@ -131,7 +159,16 @@ export function createApiHandler(
     Partial<
       Pick<
         Services,
-        "authentication" | "messaging" | "friendships" | "groups" | "privacy"
+        | "authentication"
+        | "messaging"
+        | "friendships"
+        | "groups"
+        | "privacy"
+        | "profiles"
+        | "calendar"
+        | "tabs"
+        | "security"
+        | "push"
       >
     >,
   configuration: () => Configuration,
@@ -173,6 +210,8 @@ export function createApiHandler(
           endpoint === "auth/register"
             ? await authentication.register(body, source)
             : await authentication.login(body, source, token);
+        // An account switch must retire the previous browser's push binding too.
+        if (token) await services().accounts.logout(token);
         const response = json(
           { user: session.user },
           endpoint === "auth/register" ? 201 : 200,
@@ -182,6 +221,17 @@ export function createApiHandler(
           sessionCookie(production, session.token, session.expiresAt),
         );
         return response;
+      }
+      if (endpoint === "security/recover") {
+        const authentication = services().authentication?.();
+        const security = services().security?.();
+        if (!authentication || !security)
+          throw new Error("Security unavailable");
+        await authentication.checkCredentialLimit(
+          body,
+          authenticationSource(request, process.env),
+        );
+        return json(await security.recover(body));
       }
       // Phone providers remain inactive. No per-instance OTP state.
       if (endpoint === "auth/phone/start")
@@ -197,6 +247,100 @@ export function createApiHandler(
           ? json({ errcode: "M_UNKNOWN_TOKEN", error: "Sign in again" }, 401)
           : json({ error: "UNAUTHORIZED" }, 401);
       const { accounts } = services();
+      if (endpoint.startsWith("push/")) {
+        const push = services().push;
+        if (!push) throw new Error("Push unavailable");
+        const hash = hashSessionToken(token);
+        if (!(await accounts.current(token)))
+          return json({ error: "UNAUTHORIZED" }, 401);
+        if (endpoint === "push/config") return json(push.config());
+        if (endpoint === "push/status")
+          return json(await push.status(hash, body));
+        return json(
+          endpoint === "push/subscribe"
+            ? await push.subscribe(hash, body)
+            : await push.remove(hash, body),
+        );
+      }
+      if (endpoint.startsWith("security/")) {
+        const security = services().security?.();
+        if (!security) throw new Error("Security unavailable");
+        const hash = hashSessionToken(token);
+        if (endpoint === "security/status")
+          return json(await security.status(hash));
+        const user = await accounts.current(token);
+        if (!user) return json({ error: "UNAUTHORIZED" }, 401);
+        const authentication = services().authentication?.();
+        if (!authentication) throw new Error("Authentication unavailable");
+        await authentication.checkCredentialLimit(
+          { username: user.profile.username },
+          authenticationSource(request, process.env),
+        );
+        return json(
+          endpoint === "security/recovery-codes"
+            ? await security.generate(hash, body)
+            : await security.change(hash, body),
+        );
+      }
+      if (
+        endpoint.startsWith("calendar/") ||
+        endpoint.startsWith("notifications/")
+      ) {
+        const calendar = services().calendar;
+        if (!calendar) throw new Error("Calendar unavailable");
+        const hash = hashSessionToken(token);
+        if (endpoint === "notifications/list")
+          return json(await calendar.notifications(hash));
+        if (endpoint === "notifications/read")
+          return json(await calendar.markRead(hash, body));
+        if (endpoint === "calendar/list")
+          return json(await calendar.list(hash, body));
+        if (endpoint === "calendar/conversation")
+          return json(await calendar.conversation(hash, body));
+        if (endpoint === "calendar/detail")
+          return json({ event: await calendar.detail(hash, body) });
+        if (endpoint === "calendar/create")
+          return json({ event: await calendar.create(hash, body) }, 201);
+        if (endpoint === "calendar/respond")
+          return json({ event: await calendar.respond(hash, body) });
+        if (endpoint === "calendar/edit")
+          return json({ event: await calendar.edit(hash, body) });
+        if (endpoint === "calendar/cancel")
+          return json({ event: await calendar.cancel(hash, body) });
+        return json({ event: await calendar.share(hash, body) });
+      }
+      if (endpoint.startsWith("tabs/")) {
+        const tabs = services().tabs;
+        if (!tabs) throw new Error("Tabs unavailable");
+        const hash = hashSessionToken(token);
+        if (endpoint === "tabs/context")
+          return json(await tabs.context(hash, body));
+        if (endpoint === "tabs/list") return json(await tabs.list(hash, body));
+        if (endpoint === "tabs/detail")
+          return json({ tab: await tabs.detail(hash, body) });
+        if (endpoint === "tabs/create")
+          return json({ tab: await tabs.create(hash, body) }, 201);
+        return json({ tab: await tabs.act(hash, body) });
+      }
+      if (endpoint === "profiles/view" || endpoint.startsWith("preferences/")) {
+        const profiles = services().profiles;
+        if (!profiles) throw new Error("Profiles unavailable");
+        const hash = hashSessionToken(token);
+        if (endpoint === "profiles/view") {
+          const input = z.object({ userId: z.uuid() }).strict().safeParse(body);
+          if (!input.success) throw new HttpError(400, "INVALID_REQUEST");
+          return json({
+            profile: await profiles.view(hash, input.data.userId),
+          });
+        }
+        if (endpoint === "preferences/get")
+          return json({ settings: await profiles.settings(hash) });
+        const input = appearanceSchema.safeParse(body);
+        if (!input.success) throw new HttpError(400, "INVALID_REQUEST");
+        return json({
+          settings: await profiles.updateSettings(hash, input.data),
+        });
+      }
       if (endpoint.startsWith("groups/")) {
         const groups = services().groups;
         if (!groups) throw Error("Groups unavailable");

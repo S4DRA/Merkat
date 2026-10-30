@@ -1,0 +1,117 @@
+/* Final responsive and theme pass, shared by production and visual QA. */
+.notification-trigger {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.notification-trigger .badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  pointer-events: none;
+}
+.brand-header > .notification-trigger {
+  margin-left: auto;
+}
+.brand-header .global-search {
+  margin-left: 0;
+}
+.tab-detail,
+.event-detail,
+.tab-detail > *,
+.event-detail > *,
+.social-form,
+.table-scroll {
+  min-width: 0;
+  max-width: 100%;
+}
+.social-form input:not([type="checkbox"]),
+.social-form textarea,
+.social-form select {
+  width: 100%;
+  min-width: 0;
+  border-color: var(--color-border);
+  border-radius: 10px;
+}
+.tab-totals strong {
+  overflow-wrap: anywhere;
+}
+.tab-title > div {
+  min-width: 0;
+}
+.tab-title h2 {
+  overflow-wrap: anywhere;
+}
+.account-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.account-actions .button {
+  min-width: 110px;
+}
+.profile-side .account-actions {
+  display: grid;
+}
+#appearance-title,
+#privacy {
+  scroll-margin-top: 24px;
+}
+.direct-thread-heading > .conversation-tools {
+  flex-shrink: 0;
+}
+html[data-theme="dark"] .direct-messages,
+html[data-theme="dark"] .friends-workspace {
+  background: var(--color-canvas);
+}
+html[data-theme="dark"] .friends-tabs {
+  background: var(--surface-raised);
+}
+html[data-theme="dark"] .friends-tabs > button[aria-selected="true"] {
+  background: var(--surface-content);
+}
+html[data-theme="dark"] .direct-new-messages {
+  background: var(--surface-raised);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+}
+@media (max-width: 767px) {
+  .tab-totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 20px;
+  }
+  .tab-totals > div:first-child {
+    grid-column: 1/-1;
+  }
+  .tab-totals > div:first-child strong {
+    font-size: 1.8rem;
+  }
+  .tab-totals > div:first-child small {
+    font-size: 0.75rem;
+  }
+  .account-actions {
+    gap: 8px;
+  }
+  .account-actions .button {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+  .tab-title {
+    gap: 12px;
+  }
+  .tab-title > .feature-status {
+    white-space: normal;
+    text-align: center;
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #777;
+    --foreground-muted: #4a4a45;
+  }
+  html[data-theme="dark"] {
+    --color-border: #9aab9e;
+    --foreground-muted: #c8d0ca;
+  }
+}

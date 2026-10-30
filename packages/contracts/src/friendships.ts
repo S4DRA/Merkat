@@ -20,7 +20,12 @@ export type FriendListInput = z.infer<typeof friendListSchema>;
 export type FriendActionInput = z.infer<typeof friendActionSchema>;
 export type FriendView = {
   id: string;
-  person: { id: string; username: string | null; displayName: string | null };
+  person: {
+    id: string;
+    username: string | null;
+    displayName: string | null;
+    avatarRef?: string | null;
+  };
   requestedById: string;
   status: "PENDING" | "ACCEPTED";
   createdAt: string;

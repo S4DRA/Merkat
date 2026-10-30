@@ -1,4 +1,8 @@
 "use client";
+import {
+  ConversationFeatures,
+  FeatureCard,
+} from "../plans/conversation-features";
 import Link from "next/link";
 import {
   useCallback,
@@ -215,6 +219,11 @@ export function GroupThread({
   useEffect(() => {
     void reconcile();
   }, [reconcile, revision, attempt]);
+  useEffect(() => {
+    const changed = () => void reconcile();
+    window.addEventListener("merkat:feature-change", changed);
+    return () => window.removeEventListener("merkat:feature-change", changed);
+  }, [reconcile]);
   useLayoutEffect(() => {
     const element = scroller.current;
     if (!element || !data) return;
@@ -401,6 +410,10 @@ export function GroupThread({
       aria-label="Group conversation"
     >
       <header className="direct-thread-heading">
+        <ConversationFeatures
+          scope={{ kind: "GROUP", id: groupId, channelId }}
+          userId={userId}
+        />
         <Link
           href={base}
           scroll={false}
@@ -516,7 +529,11 @@ export function GroupThread({
                 <p>{message.replyTo.text}</p>
               </blockquote>
             )}
-            <p>{message.text}</p>
+            {message.feature ? (
+              <FeatureCard reference={message.feature} userId={userId} />
+            ) : (
+              <p>{message.text}</p>
+            )}
             <footer>
               <time dateTime={message.createdAt}>
                 {stamp(message.createdAt)}
@@ -587,6 +604,25 @@ export function GroupThread({
             onClick={() => setReply(null)}
           />
         </div>
+      )}
+      {/^@(calendar|event)\b/i.test(draft.trim()) && (
+        <Button
+          className="calendar-command"
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("merkat:calendar-command", {
+                detail: JSON.stringify({
+                  kind: "GROUP",
+                  id: groupId,
+                  channelId,
+                }),
+              }),
+            );
+            setDraft("");
+          }}
+        >
+          Open conversation plans · create, share or view
+        </Button>
       )}
       <form className="direct-composer" onSubmit={send}>
         <textarea

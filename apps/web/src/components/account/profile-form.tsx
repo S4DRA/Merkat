@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { profileInputSchema, type Account } from "@merkat/contracts";
 import { Button } from "../ui/primitives";
+import { AvatarEditor } from "./avatar-editor";
 export function ProfileForm({ account }: { account: Account }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -52,57 +53,63 @@ export function ProfileForm({ account }: { account: Account }) {
     }
   }
   return (
-    <form onSubmit={submit} className="account-form">
-      <label>
-        Display name
-        <input
-          name="displayName"
-          autoComplete="nickname"
-          required
-          maxLength={60}
-          defaultValue={account.profile.displayName ?? ""}
-          disabled={pending}
-        />
-      </label>
-      <label>
-        Username
-        <input
-          name="username"
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-          required
-          minLength={3}
-          maxLength={30}
-          pattern="[A-Za-z][A-Za-z0-9_]{2,29}"
-          aria-describedby="username-help"
-          defaultValue={account.profile.username ?? ""}
-          disabled={pending}
-        />
-      </label>
-      <small id="username-help">
-        3–30 letters, numbers or underscores. Start with a letter.
-      </small>
-      {account.onboardingComplete && (
+    <>
+      <AvatarEditor
+        avatarRef={account.profile.avatarRef}
+        name={account.profile.displayName ?? account.profile.username ?? "Your"}
+      />
+      <form onSubmit={submit} className="account-form">
         <label>
-          Bio
-          <textarea
-            name="bio"
-            maxLength={160}
-            defaultValue={account.profile.bio}
+          Display name
+          <input
+            name="displayName"
+            autoComplete="nickname"
+            required
+            maxLength={60}
+            defaultValue={account.profile.displayName ?? ""}
             disabled={pending}
-            rows={3}
           />
         </label>
-      )}
-      {error && (
-        <p role="alert" className="account-error">
-          {error}
-        </p>
-      )}
-      <Button variant="primary" loading={pending} type="submit">
-        {account.onboardingComplete ? "Save" : "Continue"}
-      </Button>
-    </form>
+        <label>
+          Username
+          <input
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            minLength={3}
+            maxLength={30}
+            pattern="[A-Za-z][A-Za-z0-9_]{2,29}"
+            aria-describedby="username-help"
+            defaultValue={account.profile.username ?? ""}
+            disabled={pending}
+          />
+        </label>
+        <small id="username-help">
+          3–30 letters, numbers or underscores. Start with a letter.
+        </small>
+        {account.onboardingComplete && (
+          <label>
+            Bio
+            <textarea
+              name="bio"
+              maxLength={160}
+              defaultValue={account.profile.bio}
+              disabled={pending}
+              rows={3}
+            />
+          </label>
+        )}
+        {error && (
+          <p role="alert" className="account-error">
+            {error}
+          </p>
+        )}
+        <Button variant="primary" loading={pending} type="submit">
+          {account.onboardingComplete ? "Save" : "Continue"}
+        </Button>
+      </form>
+    </>
   );
 }

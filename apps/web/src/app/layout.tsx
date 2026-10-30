@@ -4,11 +4,15 @@ import "./account.css";
 import "./chats.css";
 import "./social-navigation.css";
 import "./groups.css";
+import "./production.css";
+import "./refinements.css";
 import { InstallAppProvider } from "../components/install-app";
+import { AppearanceProvider } from "../components/appearance";
 
 export const metadata: Metadata = {
   title: "Merkat — Talk. Plan. Meet.",
-  description: "A social space for real life. Merkat foundation preview.",
+  description:
+    "Conversations, shared plans and good company. Talk. Plan. Meet.",
   applicationName: "Merkat",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -33,9 +37,18 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var p=JSON.parse(localStorage.getItem('merkat.appearance.v1')||'{}');var d=p.theme==='DARK'||((p.theme!=='LIGHT')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.dataset.reduceMotion=String(p.reduceMotion===true);document.documentElement.dataset.largeText=String(p.largeText===true)}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body>
-        <InstallAppProvider>{children}</InstallAppProvider>
+        <AppearanceProvider>
+          <InstallAppProvider>{children}</InstallAppProvider>
+        </AppearanceProvider>
       </body>
     </html>
   );

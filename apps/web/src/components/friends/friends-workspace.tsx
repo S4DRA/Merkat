@@ -1,4 +1,5 @@
 "use client";
+import { ProfilePreview } from "../account/profile-preview";
 import {
   useCallback,
   useEffect,
@@ -273,10 +274,12 @@ export function FriendsWorkspace() {
         )}
         {page?.people.map((friend) => (
           <article key={friend.id} className="friend-row">
-            <Avatar
+            <ProfilePreview
+              userId={friend.person.id}
               name={
                 friend.person.displayName ?? friend.person.username ?? "Person"
               }
+              avatarRef={friend.person.avatarRef}
             />
             <div className="friend-name">
               <strong>

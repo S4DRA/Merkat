@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Info, Search, Settings, X } from "lucide-react";
 import type { Destination } from "../lib/navigation";
 import { ShellNavigation, destinationIcons } from "./shell-navigation";
 import { Avatar, Badge, Button, IconButton, Skeleton } from "./ui/primitives";
+import { NotificationCenter } from "./plans/notification-center";
 
 export function AppShell({
   destination,
@@ -46,6 +47,7 @@ export function AppShell({
           <span>MERKAT</span>
         </Link>
         <span className="brand-motto">TALK. PLAN. MEET.</span>
+        <NotificationCenter />
         <Link
           className="icon-link global-search"
           href="/search"

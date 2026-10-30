@@ -12,7 +12,10 @@ export class SocialError extends Error {
       | "LIMIT_REACHED"
       | "SUBMISSION_CONFLICT"
       | "CHANNEL_NAME_TAKEN"
-      | "INTERACTION_UNAVAILABLE",
+      | "INTERACTION_UNAVAILABLE"
+      | "PAYMENTS_EXCEED_TOTAL"
+      | "TAB_ALREADY_OPEN"
+      | "PENDING_CONFIRMATIONS",
   ) {
     super(code);
     brandDomainError(this, "social");

@@ -4,7 +4,7 @@ Talk. Plan. Meet. A social communication platform where conversations lead to sh
 
 ## Current state
 
-Phase 5: real direct text messaging and accepted friendships use Next.js, Prisma/PostgreSQL and Merkat sessions. Registration needs username/password, with optional private email; sign-in uses username/password. Chats supports persistent history, unread/read state and retry-safe sends. The user-approved mobile bar is Calendar → Friends → white Merkat logo/New chat → Chats → Profile. Supabase private Broadcast provides live change notifications after the documented signing-key and RLS setup. Hosted delivery and physical Xiaomi verification remain pending. Phone/Matrix code remains inactive; no seeded application accounts exist.
+The working source includes persistent accounts, direct messages, friends, groups/privacy, private profiles with PNG/JPG photos up to 2 MB, light/dark/system appearance, personal and shared calendars, durable reminders, optional browser push, offline recovery codes and chat-only spending tabs. It preserves the approved Calendar / Friends / New chat / Chats / Profile navigation and original brand assets. This is a release candidate with staging and real-device gates outstanding. The hosted app still serves the earlier release. Read [PRODUCTION_STATUS.md](docs/PRODUCTION_STATUS.md) for verified layers, limitations and exact acceptance steps.
 
 ## Requirements and local development
 
@@ -16,12 +16,12 @@ Phase 5: real direct text messaging and accepted friendships use Next.js, Prisma
 - Configure a known local PostgreSQL database and `apps/web/.env.local` for account operations. Builds/tests require no external credentials. Signed-out login remains usable without external services.
 - Set `DATABASE_URL`, exact `APP_ORIGIN` (usually `http://localhost:3000`), and a random 64-hex `AUTH_RATE_LIMIT_SECRET` in that web env file. Without these, auth stays unavailable. Generate the secret with `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`; store it only server-side and use the same value across instances.
 - Run `npm run db:migrate` only against a reviewed local/staging database, with CLI variables exported. [Docker development](infra/local/README.md) supplies a local database and migration step.
-- Apply all seven migrations, including `202610170003_groups_privacy`, to a reviewed custom local/staging target. The PostgreSQL timezone must remain UTC (Supabase's default); Prisma's pg adapter expects it. No external/production database is migrated by local startup. Restart the dev server after changing environment or dependencies, then open `/register` and create your own account. The default dev/dev:local launcher handles only its own recognized local cluster.
+- Apply all 14 committed migrations to a reviewed custom local/staging target. PostgreSQL must use UTC. No external/production database is migrated by local startup. The default dev/dev:local launcher handles only its own recognized local cluster and starts the reminder worker too.
 - For live delivery, follow [Phase 5 setup](docs/architecture/phase-5-messaging.md). Local ordinary PostgreSQL supports persistent API messaging but has no Supabase Realtime service. Missing live configuration shows a visible unavailable state; no insecure public subscription is used.
 - `npm run build`, `npm run lint`, `npm run typecheck`, `npm test`, and `npm run format:check` validate the foundation.
 - `npm run format` formats source and documentation.
 - `npm test` runs reference API checks and real PostgreSQL parity/security tests in a fresh cluster. After building, `npm run test:ui` starts built Next.js, an isolated database and test-only HTTPS ingress. Install Chromium with `npx playwright install chromium`, or set `PLAYWRIGHT_CHANNEL=msedge` for installed Edge. Session fixtures/data stay under ignored `artifacts/`; no application auth bypass exists. Public self-signed TLS fixtures must never be used for deployment.
-- After building, `npm start` runs only Next.js. Fastify remains a test reference; its standalone run scripts are removed after parity passed. The worker boundary is inactive.
+- After building, `npm start` runs only Next.js. Fastify remains a test reference. Build and run `@merkat/worker` separately for durable reminders and optional browser push; see the release status for setup and acceptance requirements.
 
 Shared packages build before applications. Before importing another workspace, declare that dependency explicitly. Add dependency ordering inside the shared layer if those packages begin consuming each other.
 
@@ -33,6 +33,7 @@ Never put credentials in `NEXT_PUBLIC_*`. Next uses pooled DATABASE_URL, APP_ORI
 
 ## Documentation
 
+- [Current feature condition, verification and release gates](docs/PRODUCTION_STATUS.md)
 - [Architecture](docs/architecture/foundation.md)
 - [Approved decisions](docs/decisions/0001-phase-1-foundation.md)
 - [Product and design constraints](docs/product/merkat.md)
@@ -45,4 +46,4 @@ Never put credentials in `NEXT_PUBLIC_*`. Next uses pooled DATABASE_URL, APP_ORI
 - [Deployment constraints](infra/deployment/README.md)
 - [Brand assets and pending icons](apps/web/public/brand/README.md)
 
-Stop after Phase 5 and the explicitly approved friends/design/optional-email additions. Groups, calls, uploads and other Phase 6 work require a new brief.
+The October 30 brief authorizes local implementation and testing of profiles, appearance/accessibility, calendar, account recovery and chat spending tabs. Production migrations/deployment require separate explicit authorization after staging acceptance. Calls/media messaging and the legacy phone/Matrix stack remain inactive.

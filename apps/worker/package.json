@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node --conditions=react-server dist/index.js",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@merkat/database": "*"
   }
 }

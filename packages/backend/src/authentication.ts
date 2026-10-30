@@ -165,6 +165,9 @@ export class AuthenticationService {
     );
     return { user, token: session.token, expiresAt: session.expiresAt };
   }
+  async checkCredentialLimit(input: unknown, source: string) {
+    await this.limit("login", source, input);
+  }
   async login(input: unknown, source: string, previousToken?: string) {
     await this.limit("login", source, input);
     const parsed = loginInputSchema.safeParse(input);

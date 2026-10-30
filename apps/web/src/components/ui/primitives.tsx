@@ -61,7 +61,7 @@ export function Avatar({
   online = false,
 }: {
   name: string;
-  src?: string;
+  src?: string | undefined;
   online?: boolean;
 }) {
   return (
@@ -71,7 +71,13 @@ export function Avatar({
       aria-label={`${name}${online ? ", online" : ""}`}
     >
       {src ? (
-        <Image src={src} alt="" fill sizes="44px" />
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="44px"
+          unoptimized={src.startsWith("/api/avatars/")}
+        />
       ) : (
         <UserRound size={22} aria-hidden="true" />
       )}

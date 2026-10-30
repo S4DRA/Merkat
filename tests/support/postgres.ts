@@ -48,6 +48,7 @@ export async function startTestDatabase(options: { migrate?: boolean } = {}) {
         {
           cwd: resolve("packages/database"),
           env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url },
+          timeout: 60000,
         },
       );
     return { url, stop: () => database.stop() };

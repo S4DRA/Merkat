@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { FeatureReference } from "./collaboration.js";
 import { usernameSchema } from "./account.js";
 import { sendMessageSchema } from "./messaging.js";
 const title = (max: number) =>
@@ -95,6 +96,7 @@ export type GroupMemberView = PublicPerson & {
   joinedAt: string;
 };
 export type GroupMessageView = {
+  feature?: FeatureReference | null;
   id: string;
   groupId: string;
   channelId: string;

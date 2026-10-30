@@ -11,10 +11,18 @@ import { privacyFence, isBlocked } from "./privacy-guard.js";
 
 const include = {
   firstUser: {
-    select: { profile: { select: { displayName: true, username: true } } },
+    select: {
+      profile: {
+        select: { displayName: true, username: true, avatarRef: true },
+      },
+    },
   },
   secondUser: {
-    select: { profile: { select: { displayName: true, username: true } } },
+    select: {
+      profile: {
+        select: { displayName: true, username: true, avatarRef: true },
+      },
+    },
   },
 } as const;
 type Friend = Prisma.FriendshipGetPayload<{ include: typeof include }>;
@@ -30,6 +38,7 @@ function view(friend: Friend, userId: string): FriendView {
       id: peerId,
       displayName: profile?.displayName ?? null,
       username: profile?.username ?? null,
+      avatarRef: profile?.avatarRef ?? null,
     },
     requestedById: friend.requestedById,
     status: friend.status,

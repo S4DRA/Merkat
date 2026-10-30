@@ -9,3 +9,8 @@ export { createFriendshipRepository } from "./friendship-repository.js";
 export { createGroupRepository } from "./group-repository.js";
 export { createPrivacyRepository } from "./privacy-repository.js";
 export { checkRuntimeDatabase } from "./runtime-readiness.js";
+export { createProfileRepository } from "./profile-repository.js";
+export { createTabRepository } from "./tab-repository.js";
+export { createCalendarRepository } from "./calendar-repository.js";
+export { createSecurityRepository } from "./security-repository.js";
+export { createPushRepository } from "./push-repository.js";

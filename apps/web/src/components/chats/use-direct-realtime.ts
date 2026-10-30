@@ -67,13 +67,17 @@ export function useDirectRealtime(
             config: { private: true, broadcast: { self: false } },
           })
           .on("broadcast", { event: "changed" }, () => {
-            if (!disposed) onChange();
+            if (!disposed) {
+              onChange();
+              window.dispatchEvent(new Event("merkat:reconcile"));
+            }
           })
           .subscribe((status) => {
             if (disposed) return;
             if (status === "SUBSCRIBED") {
               setState("live");
               onChange();
+              window.dispatchEvent(new Event("merkat:reconcile"));
             } else if (
               status === "CHANNEL_ERROR" ||
               status === "TIMED_OUT" ||

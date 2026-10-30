@@ -9,6 +9,10 @@ import {
   GroupsSurface,
 } from "../../components/groups/groups-workspace";
 import { FriendsWorkspace } from "../../components/friends/friends-workspace";
+import { ProfileWorkspace } from "../../components/account/profile-workspace";
+import { CalendarWorkspace } from "../../components/plans/calendar-workspace";
+import { SettingsWorkspace } from "../../components/account/settings-workspace";
+import { SearchWorkspace } from "../../components/friends/search-workspace";
 export default async function DestinationPage({
   params,
 }: {
@@ -30,7 +34,17 @@ export default async function DestinationPage({
         ) : undefined
       }
     >
-      {destination.id === "chats" ? (
+      {destination.id === "settings" ? (
+        <SettingsWorkspace account={account} />
+      ) : destination.id === "search" ? (
+        <SearchWorkspace />
+      ) : destination.id === "plans" ? (
+        <Suspense fallback={<p role="status">Loading calendar…</p>}>
+          <CalendarWorkspace userId={account.id} />
+        </Suspense>
+      ) : destination.id === "profile" ? (
+        <ProfileWorkspace account={account} />
+      ) : destination.id === "chats" ? (
         <Suspense fallback={<p role="status">Loading chats…</p>}>
           <ChatsSurface userId={account.id} />
         </Suspense>

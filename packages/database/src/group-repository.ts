@@ -35,6 +35,11 @@ type Message = Prisma.GroupMessageGetPayload<{
 }>;
 function messageView(m: Message): GroupMessageView {
   return {
+    feature: m.planId
+      ? { kind: "EVENT", id: m.planId }
+      : m.tabId
+        ? { kind: "TAB", id: m.tabId }
+        : null,
     id: m.id,
     groupId: m.groupId,
     channelId: m.channelId,
