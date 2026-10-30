@@ -224,6 +224,7 @@ export function createPushRepository(db: PrismaClient) {
             { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
             JSON.stringify({
               id: n.id,
+              userId: s.userId,
               title: n.title,
               body: n.body,
               href: n.href,

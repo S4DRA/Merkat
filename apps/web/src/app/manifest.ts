@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Merkat",
-    short_name: "Merkat",
+    name: "MERKAT",
+    short_name: "MERKAT",
     description: "Talk. Plan. Meet.",
     start_url: "/",
     scope: "/",
@@ -23,6 +23,7 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
         purpose: "any",
       },
+      {src:"/icons/merkat-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"},
     ],
     prefer_related_applications: false,
   };
