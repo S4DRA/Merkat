@@ -328,6 +328,23 @@ test("older history, scroll restoration, new-message positioning, unavailable st
   await expect(
     page.getByText("Live updates unavailable", { exact: true }),
   ).toBeVisible();
+  // Explicitly disabled local realtime is availability information, not an
+  // invalid capability or a reason to connect a socket.
+  await page.unroute("**/api/direct/realtime");
+  await page.route("**/api/direct/realtime", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ available: false, reason: "NOT_CONFIGURED" }),
+    }),
+  );
+  const sockets: string[] = [];
+  page.on("websocket", (socket) => sockets.push(socket.url()));
+  await page.goto("/chats");
+  await expect(
+    page.getByText("Live updates unavailable", { exact: true }),
+  ).toBeVisible();
+  expect(sockets).toEqual([]);
 });
 
 test("conversation hides navigation and reclaims the desktop sidebar; inbox and other pages restore it", async ({

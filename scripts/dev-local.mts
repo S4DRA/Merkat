@@ -5,6 +5,7 @@ import { resolve, sep } from "node:path";
 import { createServer } from "node:net";
 import { spawn, execFile, type ChildProcess } from "node:child_process";
 import { promisify } from "node:util";
+import { claimLocalRuntime, isOwnedLocalDatabase } from "./local-runtime.mjs";
 
 // Development only. Never reads or adopts a DATABASE_URL from an environment file.
 const root = resolve("artifacts/local-development");
@@ -88,6 +89,7 @@ let database: EmbeddedPostgres | undefined;
 let web: ChildProcess | undefined;
 let running = false;
 let closing: Promise<void> | undefined;
+let releaseRuntime: (() => Promise<void>) | undefined;
 async function close() {
   closing ??= (async () => {
     if (web?.pid && web.exitCode === null) {
@@ -110,6 +112,7 @@ async function close() {
       await database.stop();
       running = false;
     }
+    await releaseRuntime?.();
   })();
   await closing;
 }
@@ -118,33 +121,64 @@ try {
   const webPort = Number(process.env.MERKAT_LOCAL_PORT || 3000);
   if (!Number.isInteger(webPort) || webPort < 1024 || webPort > 65535)
     throw new Error("Use a local web port between 1024 and 65535");
-  await reservePort(webPort, "::");
   const config = await settings();
-  await reservePort(config.port);
+  const runtime = await claimLocalRuntime(root, {
+    webPort,
+    databasePort: config.port,
+  });
+  if (!runtime.owned) {
+    console.log(
+      `Merkat is already running or starting at http://localhost:${runtime.record.webPort}. Open that address; a second instance is not needed.`,
+    );
+    process.exit(0);
+  }
+  releaseRuntime = runtime.release;
+  try {
+    await reservePort(webPort);
+  } catch {
+    throw new Error(
+      `Local web port ${webPort} is occupied by another process. Stop that process or set MERKAT_LOCAL_PORT.`,
+    );
+  }
+  let reuseDatabase = false;
+  try {
+    await reservePort(config.port);
+  } catch {
+    reuseDatabase = await isOwnedLocalDatabase(config, directory);
+    if (!reuseDatabase)
+      throw new Error(
+        `Local database port ${config.port} is occupied by an unrecognized service. No existing database or process was changed.`,
+      );
+  }
   const redact = (message: unknown) =>
     String(message)
       .replaceAll(config.password, "[redacted]")
       .replaceAll(config.authSecret, "[redacted]");
-  database = new EmbeddedPostgres({
-    databaseDir: directory,
-    user: config.user,
-    password: config.password,
-    port: config.port,
-    persistent: true,
-    authMethod: "scram-sha-256",
-    postgresFlags: ["-h", "127.0.0.1", "-c", "timezone=UTC"],
-    onLog: () => {},
-    onError: (error) => console.error(redact(error)),
-  });
+  if (!reuseDatabase)
+    database = new EmbeddedPostgres({
+      databaseDir: directory,
+      user: config.user,
+      password: config.password,
+      port: config.port,
+      persistent: true,
+      authMethod: "scram-sha-256",
+      postgresFlags: ["-h", "127.0.0.1", "-c", "timezone=UTC"],
+      onLog: () => {},
+      onError: (error) => console.error(redact(error)),
+    });
   const initialized = await exists(resolve(directory, "PG_VERSION"));
   console.log(
-    initialized
-      ? "Starting existing Merkat local database…"
-      : "Creating a fresh Merkat local database…",
+    reuseDatabase
+      ? "Reusing the verified Merkat local database…"
+      : initialized
+        ? "Starting existing Merkat local database…"
+        : "Creating a fresh Merkat local database…",
   );
-  if (!initialized) await database.initialise();
-  await database.start();
-  running = true;
+  if (database) {
+    if (!initialized) await database.initialise();
+    await database.start();
+    running = true;
+  }
   const connection = `postgresql://${config.user}:${config.password}@127.0.0.1:${config.port}/postgres`;
   // Only this known, loopback-only, owned cluster is migrated by this development command.
   try {

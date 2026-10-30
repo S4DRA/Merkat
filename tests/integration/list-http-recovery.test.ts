@@ -145,6 +145,8 @@ test("real HTTP list endpoints return persisted data, distinguish expired sessio
       assert.equal((await request(endpoint)).status, 200);
     }
     offline = true;
+    const available = await request("direct/realtime");
+    assert.equal(available.status, 503); // DB/auth outage is never an availability success.
     for (const endpoint of ["direct/list", "groups/list"]) {
       const result = await request(endpoint);
       assert.equal(result.status, 503);
@@ -153,6 +155,12 @@ test("real HTTP list endpoints return persisted data, distinguish expired sessio
       assert.equal((await request(endpoint, "")).status, 401);
     }
     offline = false;
+    const notConfigured = await request("direct/realtime");
+    assert.equal(notConfigured.status, 200);
+    assert.deepEqual(await notConfigured.json(), {
+      available: false,
+      reason: "NOT_CONFIGURED",
+    });
     const directs = await request("direct/list");
     assert.equal(directs.status, 200);
     assert.ok(

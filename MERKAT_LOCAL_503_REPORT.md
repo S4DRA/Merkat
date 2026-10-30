@@ -3,6 +3,65 @@
 October 30, 2026. Scope: the latest local-only brief. No production/staging
 database was contacted or modified during this repair; no deployment was made.
 
+## Local startup and optional realtime follow-up
+
+The subsequent `EADDRINUSE 127.0.0.1:59312` was the saved local PostgreSQL
+port still being occupied. Startup tried to reserve that port unconditionally.
+The new owned runtime record prevents a second launcher from starting another
+instance. If the launcher has exited but PostgreSQL remains, startup authenticates
+to the saved loopback connection and checks `SHOW data_directory` against the
+owned cluster before reusing it. It never kills or adopts an unknown service,
+changes credentials, deletes cluster data, or substitutes a different database.
+
+The latest attached browser log concerns `/api/direct/realtime`, separately
+from DM/group lists. Ordinary local mode intentionally has no Supabase Broadcast
+configuration, but the capability endpoint treated that expected state as 503.
+It now returns authenticated, no-store availability information:
+`200 { available: false, reason: "NOT_CONFIGURED" }`. The client opens no socket
+and preserves the existing unavailable label. Invalid/partial configuration and
+actual database failures remain 503; absent/expired authentication remains 401.
+Configured signed capabilities and private-channel authorization are unchanged.
+
+Actual launcher checks passed for an already-running app (a second `npm run dev`
+exits 0 with its URL), a stale launcher record, and an independently running
+copy of the same owned cluster (startup prints that it is reusing the verified
+database). No database reset was performed. An initial attempt to reproduce an
+orphan by stopping the process tree also stopped PostgreSQL; that attempt was
+not counted as evidence of reuse. The existing cluster was then started with
+its bundled `pg_ctl`, and the successful reuse branch was observed directly.
+
+Real authenticated localhost checks return **200** for both lists and explicit
+disabled realtime, with **zero browser page errors and zero realtime 503s**.
+Opening an existing DM shows **Live unavailable**. All three saved sessions,
+two original DM messages and three group messages remain valid after the app
+and database restarts. Evidence stays ignored in
+`artifacts/launcher-browser-verification.json`,
+`launcher-persistence-verification.json` and `duplicate-local-launch.log`.
+
+Regression coverage adds four launcher/real-PostgreSQL tests for active-instance
+reuse, stale-record recovery, unknown-record preservation and authenticated
+data-directory verification (including wrong-directory and wrong-password
+rejection). HTTP regressions distinguish disabled realtime, invalid configuration,
+authentication failure and a real database outage. The browser unavailable-state
+regression covers the disabled payload and verifies that no socket is created;
+this mocked availability case is client regression coverage, not the real-HTTP
+acceptance evidence above.
+
+Files changed in this follow-up:
+
+- `scripts/dev-local.mts` and new `scripts/local-runtime.mts`: instance ownership,
+  safe port handling and verified database reuse.
+- `packages/contracts/src/messaging.ts`, `apps/web/src/lib/server/http-api.ts` and
+  `apps/web/src/components/chats/use-direct-realtime.ts`: explicit disabled
+  realtime availability and its existing UI state.
+- `tests/integration/local-runtime.test.ts`, `tests/integration/messaging.test.ts`,
+  `tests/integration/list-http-recovery.test.ts`, `tests/support/run-integration.ts`
+  and `tests/browser/messaging.spec.ts`: regressions described above.
+- `README.md`, `MERKAT_LOCAL_503_REPORT.md` and `MERKAT_TEST_RESULTS.md`: startup
+  behavior, evidence and verification limits.
+
+No schema, dependency or visual design changes.
+
 ## Root cause
 
 The old root `npm run dev` built packages and started only Next.js. Next loaded
@@ -82,9 +141,9 @@ Final quality results for this repair:
 | ---------------------------------------- | ----------------------------------------------------------------- |
 | Lint                                     | PASS, zero warnings                                               |
 | Workspace and test/script types          | PASS                                                              |
-| `npm test`                               | PASS: 68 integration + 2 reference API tests, zero failures/skips |
+| `npm test`                               | PASS: 72 integration + 2 reference API tests, zero failures/skips |
 | `npm run build`                          | PASS, optimized Next production build                             |
-| Full browser suite                       | PASS: **54 passed (2.4m)**                                        |
+| Full browser suite                       | PASS: **54 passed (2.7m)**                                        |
 | Actual localhost:3000 three-user journey | PASS, real local HTTP/database; no mocked success responses       |
 | Owned PostgreSQL + app restart           | PASS, sessions and original messages retained                     |
 

@@ -1,6 +1,43 @@
 # MERKAT test results
 
-## Latest local-only 503 repair
+## Latest local startup and optional realtime follow-up
+
+The saved local PostgreSQL port was already occupied. Startup now recognizes an
+active launcher and safely reuses an independently running owned database only
+after authentication and an exact data-directory check. Fully unconfigured local
+realtime returns explicit disabled availability; incomplete configuration and
+actual database outages still fail, and authentication remains required.
+
+Final commands on Node **22.17.0**, npm **11.4.2**:
+
+| Command                                            | Result                                                      |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| `npm run lint`                                     | PASS, zero warnings                                         |
+| `npm run typecheck`                                | PASS, workspaces and test/script types                      |
+| `npm test`                                         | PASS: **72 integration + 2 API tests**, zero failures/skips |
+| `npm run build`                                    | PASS, optimized production build                            |
+| `npm run test:ui -- --reporter=line`               | PASS: **54 passed (2.7m)**                                  |
+| Changed-file Prettier check and `git diff --check` | PASS                                                        |
+
+Real localhost browser/HTTP checks return 200 for DM lists, group lists and
+disabled realtime availability, show the existing unavailable label, and report
+zero page errors/realtime 503s. Three saved sessions and the original two DM/three
+group messages survive the database/app restart. A second launcher exits 0 with
+the current URL. See `MERKAT_LOCAL_503_REPORT.md` for files and exact evidence.
+
+One initial integration run returned `TRY_LATER` in the existing concurrent
+friendship registration fixture (71 passed, 1 failed). The unmodified fixture
+passed on subsequent fresh-database runs, including the final supported-Node
+run; its intermittent limiter failure was not reproduced. An initial local
+browser probe selected a thread-only status on the inbox; selecting the saved
+conversation corrected the probe without an application UI change.
+
+Final logs are ignored under `artifacts/launcher-final-{lint,types,tests,build,browser}.log`.
+Live Supabase Broadcast is unconfigured locally. Existing mock-socket lifecycle
+regressions pass, but hosted websocket delivery remains unverified. No production
+database contact, deployment, schema reset or dependency changes were performed.
+
+## Previous local-only 503 repair
 
 Current scope and detailed evidence: `MERKAT_LOCAL_503_REPORT.md`. Real local
 acceptance returns 200 from DM/group lists using three accounts, and a full owned

@@ -102,3 +102,9 @@ export type RealtimeCapability = {
   expiresAt: number;
   topic: string;
 };
+export type RealtimeConnection =
+  | RealtimeCapability
+  | {
+      available: false;
+      reason: "NOT_CONFIGURED";
+    };

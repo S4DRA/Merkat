@@ -278,7 +278,15 @@ export function createApiHandler(
         // Authenticate even when the hosted integration hasn't been configured.
         if (!realtimeConfigured()) {
           await messaging.realtimeSession(token);
-          return json({ error: "REALTIME_UNAVAILABLE" }, 503);
+          if (
+            [
+              process.env.SUPABASE_REALTIME_URL,
+              process.env.SUPABASE_PUBLISHABLE_KEY,
+              process.env.MERKAT_REALTIME_SIGNING_JWK,
+            ].some(Boolean)
+          )
+            throw new Error("Realtime configuration is incomplete or invalid.");
+          return json({ available: false, reason: "NOT_CONFIGURED" });
         }
         return json(await issueRealtimeCapability(messaging, token));
       }

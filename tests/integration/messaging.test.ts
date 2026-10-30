@@ -493,7 +493,21 @@ test("strict inputs, real HTTP authorization, origin, size, status and no-store 
   const listed = await request("direct/list", {});
   assert.equal(listed.status, 200);
   assert.equal(listed.headers.get("Cache-Control"), "no-store");
-  assert.equal((await request("direct/realtime", {})).status, 503);
+  const unavailableRealtime = await request("direct/realtime", {});
+  assert.equal(unavailableRealtime.status, 200);
+  assert.deepEqual(await unavailableRealtime.json(), {
+    available: false,
+    reason: "NOT_CONFIGURED",
+  });
+  const previousRealtimeUrl = process.env.SUPABASE_REALTIME_URL;
+  try {
+    process.env.SUPABASE_REALTIME_URL = "invalid";
+    assert.equal((await request("direct/realtime", {})).status, 503);
+  } finally {
+    if (previousRealtimeUrl === undefined)
+      delete process.env.SUPABASE_REALTIME_URL;
+    else process.env.SUPABASE_REALTIME_URL = previousRealtimeUrl;
+  }
   assert.equal(
     (await request("direct/realtime", {}, "a".repeat(43))).status,
     401,

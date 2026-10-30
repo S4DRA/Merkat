@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import type { RealtimeCapability } from "@merkat/contracts";
-import { directRequest } from "../../lib/direct-client";
+import type { RealtimeCapability, RealtimeConnection } from "@merkat/contracts";
+import { directRequest, DirectRequestError } from "../../lib/direct-client";
 
 export function useDirectRealtime(
   onChange: () => void,
@@ -20,12 +20,15 @@ export function useDirectRealtime(
     async function load() {
       if (capability && capability.expiresAt * 1000 > Date.now() + 30000)
         return capability;
-      refreshing ??= directRequest<RealtimeCapability>(
-        "direct/realtime",
-        {},
-      ).finally(() => {
-        refreshing = undefined;
-      });
+      refreshing ??= directRequest<RealtimeConnection>("direct/realtime", {})
+        .then((result) => {
+          if ("available" in result)
+            throw new DirectRequestError("REALTIME_UNAVAILABLE");
+          return result;
+        })
+        .finally(() => {
+          refreshing = undefined;
+        });
       capability = await refreshing;
       return capability;
     }

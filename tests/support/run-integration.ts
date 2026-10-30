@@ -20,6 +20,7 @@ try {
       "tests/integration/production-recovery.test.ts",
       "tests/integration/database-connections.test.ts",
       "tests/integration/list-http-recovery.test.ts",
+      "tests/integration/local-runtime.test.ts",
     ],
     {
       stdio: "inherit",
