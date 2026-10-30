@@ -87,7 +87,7 @@ for (const width of [320, 360, 390, 430]) {
       fullPage: true,
     });
     await page.goto("/profile");
-    await page.getByRole("link", { name: "Edit profile" }).click();
+    await page.getByRole("link", { name: "Edit profile" }).first().click();
     await expect(page).toHaveURL(/\/profile\/edit$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/profile$/);

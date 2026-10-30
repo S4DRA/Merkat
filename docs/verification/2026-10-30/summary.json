@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-30T17:55:01.9677871+03:00",
+  "baseline": "466a2ac9b1ce4a06f2cc60c5154b967c935edf31",
+  "branch": "new-chat/work/merkat-audit",
+  "unit": {
+    "skipped": 0,
+    "failed": 0,
+    "passed": 11
+  },
+  "reference": {
+    "skipped": 0,
+    "failed": 0,
+    "passed": 2
+  },
+  "components": {
+    "browserErrors": 0,
+    "http": "mocked",
+    "passed": 40
+  },
+  "sql": {
+    "postgresProcessRestartPersistence": true,
+    "result": "PASS",
+    "migrations": 14,
+    "networkConnections": 0
+  },
+  "browserCollection": {
+    "tests": 54,
+    "result": "PASS",
+    "files": 10
+  },
+  "realIntegration": {
+    "result": "BLOCKED",
+    "reason": "loopback connect EACCES",
+    "exitCode": 1
+  },
+  "realBrowser": {
+    "result": "BLOCKED",
+    "reason": "loopback connect EACCES",
+    "exitCode": 1
+  },
+  "webBuild": "PASS Webpack",
+  "workerBuild": "PASS",
+  "lint": "PASS",
+  "types": "PASS",
+  "schema": "PASS",
+  "pushDeviceDelivery": "NOT VERIFIED",
+  "productionChanged": false
+}

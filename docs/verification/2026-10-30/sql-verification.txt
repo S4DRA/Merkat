@@ -1,0 +1,1 @@
+{"migrations":14,"engine":"PostgreSQL single-user mode","migrationAndConstraintChecks":"PASS","networkConnections":0,"persistedAcrossPostgresRestart":true}

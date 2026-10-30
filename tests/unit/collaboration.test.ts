@@ -207,3 +207,28 @@ test("avatar content checks reject renamed files, invalid data and oversized inp
     .toBuffer();
   await assert.rejects(normalizeAvatar(png, "image/jpeg"));
 });
+
+test("avatar byte boundary accepts exactly two million bytes and rejects one more", async () => {
+  const jpeg = await sharp({
+    create: { width: 4, height: 4, channels: 3, background: "orange" },
+  })
+    .jpeg()
+    .toBuffer();
+  // JPEG permits trailing bytes; normalization strips them from stored output.
+  const boundary = Buffer.concat([jpeg, Buffer.alloc(2_000_000 - jpeg.length)]);
+  assert.equal(boundary.length, 2_000_000);
+  assert.ok((await normalizeAvatar(boundary, "image/jpeg")).length < 524288);
+  await assert.rejects(
+    normalizeAvatar(Buffer.concat([boundary, Buffer.from([0])]), "image/jpeg"),
+  );
+});
+
+test("small encoded files cannot bypass the avatar dimension limit", async () => {
+  const wide = await sharp({
+    create: { width: 8193, height: 1, channels: 3, background: "black" },
+  })
+    .png()
+    .toBuffer();
+  assert.ok(wide.length < 2_000_000);
+  await assert.rejects(normalizeAvatar(wide, "image/png"));
+});

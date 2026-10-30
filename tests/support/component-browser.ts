@@ -423,6 +423,34 @@ try {
     () => document.documentElement.dataset.reduceMotion === "true",
   );
   checks++;
+  await page.getByLabel("System", { exact: true }).check();
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.waitForFunction(
+    () => document.documentElement.dataset.theme === "dark",
+  );
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.waitForFunction(
+    () => document.documentElement.dataset.theme === "light",
+  );
+  checks++;
+  await page.getByLabel("Larger text", { exact: false }).check();
+  await page.waitForFunction(
+    () => document.documentElement.dataset.largeText === "true",
+  );
+  checks++;
+  for (const width of [320, 768, 1024]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("https://merkat.test/tabs-preview");
+    await page.getByText("Amsterdam beer", { exact: false }).first().waitFor();
+    assert.equal(
+      await page
+        .locator(".tab-detail")
+        .evaluate((el) => el.scrollWidth > el.clientWidth + 1),
+      false,
+      `Tab clips at ${width}px with larger text`,
+    );
+    checks++;
+  }
   await page.goto("https://merkat.test/profile/edit");
   await page.getByLabel("Choose profile photo").setInputFiles({
     name: "too-large.jpg",
@@ -476,6 +504,24 @@ try {
     await profileTrigger.evaluate((el) => el === document.activeElement),
     true,
     "Profile dialog returns keyboard focus",
+  );
+  checks++;
+  await page.goto("https://merkat.test/plans");
+  await page.getByRole("button", { name: "New plan", exact: true }).click();
+  await page.getByLabel("Invite people (optional)").fill("@qa_bob, qa_casey");
+  await page.getByLabel(/What.s the plan/).fill("Invited from calendar");
+  await page.getByLabel("Starts", { exact: true }).fill("2026-11-12T20:00");
+  await page.getByLabel("Ends", { exact: true }).fill("2026-11-12T21:00");
+  await page.getByRole("button", { name: "Create plan", exact: true }).click();
+  await page
+    .getByRole("heading", { name: "Invited from calendar", exact: true })
+    .waitFor();
+  const invitationRequest = requests
+    .filter((r) => r.path === "/api/calendar/create")
+    .at(-1)!;
+  assert.deepEqual(
+    (invitationRequest.body as { usernames: string[] }).usernames,
+    ["qa_bob", "qa_casey"],
   );
   checks++;
   assert.deepEqual(errors, [], "Product components emitted browser errors");

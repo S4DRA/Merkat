@@ -1,0 +1,80 @@
+
+> merkat@0.0.0 test:unit
+> node --conditions=react-server --import tsx --test tests/unit/*.test.ts
+
+TAP version 13
+# Subtest: beer and shared-shot example distinguishes consumption from venue payments
+ok 1 - beer and shared-shot example distinguishes consumption from venue payments
+  ---
+  duration_ms: 9.163
+  type: 'test'
+  ...
+# Subtest: unconfirmed shared allocations never become financial obligations
+ok 2 - unconfirmed shared allocations never become financial obligations
+  ---
+  duration_ms: 0.3376
+  type: 'test'
+  ...
+# Subtest: minor-unit remainder allocation is stable and exactly reconciles
+ok 3 - minor-unit remainder allocation is stable and exactly reconciles
+  ---
+  duration_ms: 0.1736
+  type: 'test'
+  ...
+# Subtest: quantity allocation uses explicit weights
+ok 4 - quantity allocation uses explicit weights
+  ---
+  duration_ms: 0.2214
+  type: 'test'
+  ...
+# Subtest: money input accepts decimal comma without floating-point calculations
+ok 5 - money input accepts decimal comma without floating-point calculations
+  ---
+  duration_ms: 0.2256
+  type: 'test'
+  ...
+# Subtest: timezone conversion rejects missing and ambiguous DST wall times
+ok 6 - timezone conversion rejects missing and ambiguous DST wall times
+  ---
+  duration_ms: 7.6872
+  type: 'test'
+  ...
+# Subtest: PNG and JPEG avatars decode, normalize and lose metadata
+ok 7 - PNG and JPEG avatars decode, normalize and lose metadata
+  ---
+  duration_ms: 17.9919
+  type: 'test'
+  ...
+# Subtest: avatar content checks reject renamed files, invalid data and oversized inputs
+ok 8 - avatar content checks reject renamed files, invalid data and oversized inputs
+  ---
+  duration_ms: 1.2231
+  type: 'test'
+  ...
+# Subtest: avatar byte boundary accepts exactly two million bytes and rejects one more
+ok 9 - avatar byte boundary accepts exactly two million bytes and rejects one more
+  ---
+  duration_ms: 6.7332
+  type: 'test'
+  ...
+# Subtest: small encoded files cannot bypass the avatar dimension limit
+ok 10 - small encoded files cannot bypass the avatar dimension limit
+  ---
+  duration_ms: 1.2799
+  type: 'test'
+  ...
+# Subtest: unconfigured push fails closed without querying a database or claiming device delivery
+ok 11 - unconfigured push fails closed without querying a database or claiming device delivery
+  ---
+  duration_ms: 11.2901
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 624.2633

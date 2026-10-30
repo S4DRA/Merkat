@@ -1,164 +1,90 @@
 # MERKAT test results
 
-## Latest local startup and optional realtime follow-up
+October 30, 2026, Europe/Istanbul. Baseline `466a2ac`; continuation branch `new-chat/work/merkat-audit`. These results are from the continuation run, not the historical Phase 6 report.
 
-The saved local PostgreSQL port was already occupied. Startup now recognizes an
-active launcher and safely reuses an independently running owned database only
-after authentication and an exact data-directory check. Fully unconfigured local
-realtime returns explicit disabled availability; incomplete configuration and
-actual database outages still fail, and authentication remains required.
+## Result summary
 
-Final commands on Node **22.17.0**, npm **11.4.2**:
+| Check                                | Command / evidence file                                                                                     | Observed result                                                                                           |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Shared packages                      | `scripts/build-sandbox.ps1`; `packages-verification.txt`                                                    | PASS, Prisma generated and contracts/backend/database compiled.                                           |
+| Unit tests                           | `npm run test:unit`; `unit-verification.txt`                                                                | PASS: 11 tests, zero failures/skips.                                                                      |
+| Reference API tests                  | `node --conditions=react-server --import tsx --test apps/api/src/app.test.ts`; `reference-verification.txt` | PASS: 2 tests, zero failures/skips.                                                                       |
+| All workspace types                  | `npm run typecheck --workspaces --if-present`; `types-verification.txt`                                     | PASS: API, web route types, worker and shared packages.                                                   |
+| Final affected web/test types        | `tsc -p apps/web/tsconfig.json --noEmit`, `tsc -p tests/tsconfig.json`; corresponding text evidence         | PASS, including new service and browser scenarios.                                                        |
+| Lint                                 | `eslint . --max-warnings 0`; `lint-verification.txt`                                                        | PASS, zero warnings.                                                                                      |
+| Schema                               | `npm run db:validate`; `schema-verification.txt`                                                            | PASS, Prisma 7.10.0.                                                                                      |
+| SQL migrations and persistence       | `npm run test:sql:offline`; `sql-verification.txt`                                                          | PASS, 14 exact SQL migrations, integrity assertions and second-process persistence checks.                |
+| Component/browser QA                 | `npm run test:components`; `components-verification.txt`                                                    | PASS: 40 checks, zero browser errors, 28 internal screenshots. Explicit mocked HTTP and Next adapters.    |
+| Optimized web build                  | `next build --webpack`, Node 22.17.0, Next 16.4.1; `build-verification.txt`                                 | PASS without import warnings; 12 static pages generated and dynamic routes compiled.                      |
+| Worker build                         | `npm run build -w @merkat/worker`; `worker-verification.txt`                                                | PASS. This does not mean a hosted worker is operating.                                                    |
+| Compiled liveness handler            | In-process call to built Next route; `compiled-route-verification.txt`                                      | PASS: status 200 and expected JSON; in-process, not an HTTP network test.                                 |
+| Full service integration             | `node --import tsx tests/support/run-integration.ts`; `integration-verification.txt`                        | BLOCKED, nonzero exit before database startup: loopback connect EACCES. Zero feature-test passes claimed. |
+| Full real browser suite              | `npm run test:ui -- --reporter=line`; `browser-verification.txt`                                            | BLOCKED, nonzero web-server setup exit from the same database preflight. No end-to-end pass claimed.      |
+| Clean dependency install / remote CI | Manual workflow provided                                                                                    | NOT RUN. Existing installed dependencies were used; CI must verify npm ci.                                |
 
-| Command                                            | Result                                                      |
-| -------------------------------------------------- | ----------------------------------------------------------- |
-| `npm run lint`                                     | PASS, zero warnings                                         |
-| `npm run typecheck`                                | PASS, workspaces and test/script types                      |
-| `npm test`                                         | PASS: **72 integration + 2 API tests**, zero failures/skips |
-| `npm run build`                                    | PASS, optimized production build                            |
-| `npm run test:ui -- --reporter=line`               | PASS: **54 passed (2.7m)**                                  |
-| Changed-file Prettier check and `git diff --check` | PASS                                                        |
+Text evidence is included under `docs/verification/2026-10-30/` in the source archive. Empty successful type/lint logs are accompanied by this recorded result table. Historical tests and prior mocked transport results are not added to these counts.
 
-Real localhost browser/HTTP checks return 200 for DM lists, group lists and
-disabled realtime availability, show the existing unavailable label, and report
-zero page errors/realtime 503s. Three saved sessions and the original two DM/three
-group messages survive the database/app restart. A second launcher exits 0 with
-the current URL. See `MERKAT_LOCAL_503_REPORT.md` for files and exact evidence.
+Browser collection also passes: `npm run test:ui -- --list` discovers 54 tests in 10 files. This is collection only. The new browser test uses an existing PNG fixture instead of importing sharp into the Playwright collector, avoiding a Node module-loader failure discovered during collection.
 
-One initial integration run returned `TRY_LATER` in the existing concurrent
-friendship registration fixture (71 passed, 1 failed). The unmodified fixture
-passed on subsequent fresh-database runs, including the final supported-Node
-run; its intermittent limiter failure was not reproduced. An initial local
-browser probe selected a thread-only status on the inbox; selecting the saved
-conversation corrected the probe without an application UI change.
-
-Final logs are ignored under `artifacts/launcher-final-{lint,types,tests,build,browser}.log`.
-Live Supabase Broadcast is unconfigured locally. Existing mock-socket lifecycle
-regressions pass, but hosted websocket delivery remains unverified. No production
-database contact, deployment, schema reset or dependency changes were performed.
-
-## Previous local-only 503 repair
-
-Current scope and detailed evidence: `MERKAT_LOCAL_503_REPORT.md`. Real local
-acceptance returns 200 from DM/group lists using three accounts, and a full owned
-PostgreSQL/app restart preserves sessions, two DM messages and three group messages.
-The new real HTTP regression covers 401 for expired/absent sessions, 503 for an
-unavailable database, then recovery to persisted 200 results.
-
-Current final run: lint and typecheck pass; `npm test` passes **68 integration + 2
-API tests** with zero failures/skips; optimized production build passes. The full
-browser run passes **54 tests (2.4m)**, including the new three-user persistence,
-Retry and draft-preservation regression, recorded under
-`artifacts/local-fix-browser.log`. Earlier results
-below remain separately labeled history and do not replace this local acceptance.
-
-October 30, 2026, Europe/Istanbul. Current run on
-`fix/production-chat-group-loading`, baseline `6ea62ba`. Node **22.17.0**, npm
-**11.4.2**, existing locked dependencies. Results from the other recovered
-checkout are not included in these counts.
-
-## Latest connection-error follow-up
-
-The user's additional logs were traced through Next's session guard, the real
-account repository, Prisma 7.10's installed transaction defaults, and the actual
-pg driver. The configured hosted database responded to read-only probes while
-`ChatGroup` was still missing. No hosted writes or environment changes were made.
-
-| Current check                        | Result                                                            |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| `npm run typecheck`                  | PASS, all workspaces and test/script types                        |
-| `npm run lint`                       | PASS, zero warnings                                               |
-| `npm test`                           | PASS: **67 integration tests + 2 API tests**, zero failures/skips |
-| `npm run build`                      | PASS, optimized Next production build                             |
-| `npm run test:ui -- --reporter=line` | PASS: **53 passed (2.4m)**, zero failures                         |
-| Approved production migration        | BLOCKED only on owner-capable access; approval has been received  |
-
-Before changing runtime behavior, three new real TCP/PostgreSQL regression tests
-failed against the baseline (62 existing tests passed, 3 failed). A 2.3-second
-connection exceeded Prisma's 2-second acquisition default despite fitting within
-the driver's 5-second deadline. A dropped session read was not recovered, and a
-persistent failure made only one attempt.
-
-After correction, all five connection regressions pass: delayed acquisition,
-fresh reconnect for a dropped session read, bounded failure after two attempts,
-expiry during reconnect staying unauthenticated, and permanent/schema/auth errors
-excluded from retry classification. A test-only nullable URL type error was
-corrected before the final successful typecheck. These tests use real local TCP
-faults and PostgreSQL, not HTTP mocks. No transaction/write retries were added.
-
-Evidence: `artifacts/connection-baseline.log`,
-`connection-final-tests.log`, `connection-typecheck.log`, `connection-lint.log`,
-`connection-build.log` and `connection-browser.log`. The rest of this report
-preserves the initial schema-repair run separately.
-
-## Initial schema-repair verification
-
-| Command/check                                               | Exact result                                                                                       |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `npm run build:packages`                                    | PASS: Prisma generated; contracts/backend/database compiled                                        |
-| `npm run lint`                                              | PASS: exit 0, zero warnings                                                                        |
-| `npm run typecheck`                                         | PASS: package builds, workspace typechecks, Next route generation and test/script TypeScript       |
-| `npm test`                                                  | PASS: 2 reference API tests + 62 real database/service/HTTP integration tests; zero failures/skips |
-| `npm run build`                                             | PASS: optimized Next 16.4.1 Turbopack production build; 9 static pages and dynamic routes          |
-| `npm run build -w @merkat/worker`                           | PASS: current worker boundary compiles; this revision has no running durable reminder/push worker  |
-| `npm run db:validate`                                       | PASS: Prisma 7.10.0 schema valid                                                                   |
-| `npm run test:ui -- --reporter=line`                        | PASS: **53 passed (2.4m)**, zero failures                                                          |
-| Runtime schema CLI using existing hosted server environment | EXPECTED NONZERO: exit 1, `ready: false`, nine missing tables and three missing quota columns      |
-| Production SQL mutations/deployment                         | NOT RUN: approval and migration-owner access required                                              |
-
-## Root-cause regression
-
-`tests/integration/production-recovery.test.ts` is included in the 62-test suite.
-It creates an owned disposable PostgreSQL cluster, applies the first six actual
-migrations, models Supabase's SQL contracts, and registers three independent
-username/password users using the real restricted backend role. It saves an
-existing DM/message before the upgrade.
-
-Observed before the repair:
+## Exact key output
 
 ```text
-direct/list  -> HTTP 503; safe diagnostic code P2021
-groups/list  -> HTTP 503; safe diagnostic code P2021
-people/find  -> HTTP 503; safe diagnostic code P2010
+Unit: tests 11; pass 11; fail 0; skipped 0
+Reference: tests 2; pass 2; fail 0; skipped 0
+{"componentChecks":40,"browserErrors":0,"transport":"Explicit mocked HTTP; not live end-to-end verification"}
+{"migrations":14,"engine":"PostgreSQL single-user mode","migrationAndConstraintChecks":"PASS","networkConnections":0,"persistedAcrossPostgresRestart":true}
+Error: TEST_ENVIRONMENT_BLOCKED: loopback unavailable (EACCES). Real service tests did not run.
 ```
 
-The schema checker rejects that state. After the existing seventh migration it
-still rejects missing runtime grants/policies. After the exact existing runtime
-SQL (also reapplied once), it returns `ready: true` and all three endpoints return 200. Assertions verify original message IDs/history survive, DM retry dedupes,
-group invitations remain optional/require acceptance, group sends/history work,
-outsiders receive 404, browser roles cannot read messages, application reports
-remain unreadable and private invalidation payloads contain no content.
+The loopback probe used an ephemeral server owned by this run and a client connecting to that server. Listening succeeded; connecting was rejected. No production host, database credentials or hosted account were involved. The integration/browser failures are environmental blockers, not evidence that the application behavior passed or failed.
 
-The second added test verifies the error classifier never returns unknown codes,
-exception messages or metadata. Both added tests pass; no existing test was
-weakened, disabled or converted into a skip.
+## What passed at each layer
 
-## Browser evidence and limits
+### Native unit/reference layer
 
-Playwright runs against the actual built Next.js server through local HTTPS and
-a real isolated database. It covers registration/immediate entry, login/logout,
-session independence/CSRF/throttling, profile changes, friends, new DM/group,
-invitations, messages/history/receipts, retries/reconnect, navigation/back,
-keyboard/dialog focus, install/manifest assets and responsive widths
-320/360/390/430/768/1024/1280/1440, plus landscape/reduced motion where specified.
+The spending example yields 135,000 minor units total, consumption A=50,000/B=55,000/C=30,000 and B/C repayments to A after A pays the venue. Pending consent is excluded. Remainders and quantity allocations reconcile deterministically. Decimal-comma parsing avoids floating-point money calculations. Time conversion rejects invalid calendar dates and nonexistent/ambiguous DST wall times.
 
-Tests explicitly labeled mock socket/transport replace Supabase delivery while
-retaining real HTTP/database operations. They do not prove hosted private
-websocket delivery. Install tests synthesize install events; they do not prove a
-physical installation. No production test users/messages were created.
+Actual sharp decoding/normalization handles PNG/JPEG, strips metadata and enforces format, size and dimension limits. An exactly 2,000,000-byte valid JPEG input is accepted and 2,000,001 bytes is rejected; a small encoded image wider than 8192 pixels is rejected. Missing push configuration returns unavailable/zero attempts without database I/O or a delivery claim. The two reference checks cover liveness and safe invalid configuration.
 
-Logs for this run are local/ignored under `artifacts/production-loading-*.log`,
-`artifacts/production-recovery.log` and the sanitized
-`artifacts/production-runtime-readiness.json`. Playwright screenshots/diagnostics
-remain under the existing ignored artifact paths. There were no UI changes that
-need new design before/after comparisons.
+### Real PostgreSQL, without sockets
 
-## Not verified
+Fresh private cluster; all 14 committed SQL migrations executed against native PostgreSQL. Assertions cover new-table RLS and browser privileges, avatar/theme constraints, reminder uniqueness, one active tab, immutable closed orders/snapshots, scope FKs, cross-conversation reference rejection, push session identity and single-use recovery mutation.
 
-Live post-migration behavior, exact production database target confirmation with
-owner access, production backup/restore, physical Xiaomi/iOS installation,
-hosted multi-device realtime, actual push display, the separate recovered
-candidate's richer features, and a fresh `npm ci` were not performed here. The
-current checkout does not implement the attached new gesture/month-calendar/PWA
-update requirements; see the UX/PWA inventories rather than treating these
-regression passes as acceptance of those features.
+The first process exits. A second PostgreSQL process opens the same data directory and verifies stored users, the closed tab snapshot, used recovery code and runtime-role avatar access. This proves actual disk persistence for those SQL fixtures. It does not verify Prisma's socket adapter, the application API, concurrent transactions or authenticated browser behavior. Single-user mode is not a concurrent service.
+
+### Component/browser layer
+
+Real React product components/CSS rendered in Chromium at 390px and 1440px in light/dark themes; additional tab overflow checks at 320/768/1024px with larger text. Checks include theme controls, OS system-theme changes, reduced-motion and larger-text settings, oversized upload rejection before sending, event creation/invitation payloads, solo-order edit UI and Escape/focus return on profile dialogs.
+
+The harness intercepts HTTP and adapts Next navigation/image primitives. No mocked result is counted as a successful API/database call. These checks do not certify contrast compliance, screen-reader behavior, physical-device safe areas, live realtime or notification display.
+
+## Real-service scenarios implemented but not executed
+
+`tests/integration/collaboration.test.ts` uses real registered users and actual repositories against its own fresh database. It never resets quotas or adopts a hosted URL. Coverage now includes private avatar persistence/removal, outsider denial, saved preferences across independent clients, logout subscription cleanup, retry-safe two-way DMs, three-user ordered group history, invitation response, Maybe/Going subscription, 24/5-hour jobs, concurrent/reconstructed workers, dedupe, edit/cancel rescheduling, personal-plan sharing, consent/decline/rounding, stale-version concurrent edits, idempotent retries, venue payment/repayment confirmation, closed history, member removal and password/recovery/session invalidation.
+
+`tests/browser/collaboration.spec.ts` adds three separate authenticated contexts using actual HTTP routes and database-backed fixture sessions. It tests PNG upload/reload, oversized rejection, group invitation acceptance, persisted group messages after reload, calendar RSVP/list synchronization, event deep link, shared-expense consent and exact rounding, payment/closure/history and cancellation. It contains no HTTP response mocks. Existing password-auth browser tests cover registration/login without email, phone or OTP verification. The local browser fixture has no real Supabase service; even in a normal run, reload persistence is distinct from hosted live delivery.
+
+The suites are type-checked, not runtime-verified here. Potential failures on an unrestricted runner must be investigated; the presence of an assertion is not proof it passes.
+
+## Reproduction and next execution
+
+Use Node 22.17+ within Node 22 and npm 11. On a normal private checkout:
+
+```sh
+npm ci
+npm run build:packages
+npm run lint
+npm run typecheck
+npm run db:validate
+npm run test:unit
+npm test
+npm run build -w @merkat/web -- --webpack
+npm run build -w @merkat/worker
+npx playwright install --with-deps chromium
+npm run test:ui
+npm run test:components
+```
+
+The manual `.github/workflows/release-verification.yml` carries these checks, without production secrets or deployment. It was not remotely dispatched. The isolated runners create their own databases; do not replace their URLs with production connections.
+
+This managed Windows host denies workspace junctions and nested asynchronous build-directory creation. Verification therefore used existing copied workspace packages, synchronized builds, the scoped `sandbox-fs.cjs` mkdir adapter, `MERKAT_BUILD_DIR=.next-handoff` and cache disabled for copied packages. The preload only affects that generated directory and is not part of application runtime. Normal npm-linked workspaces do not use these overrides. Default Turbopack and a clean npm ci remain unverified in this host.

@@ -70,7 +70,7 @@ test("onboarding, profile save and logout use real sessions", async ({
     .getByRole("navigation")
     .getByRole("link", { name: "Profile" })
     .click();
-  await page.getByRole("link", { name: "Edit profile" }).click();
+  await page.getByRole("link", { name: "Edit profile" }).first().click();
   await page.getByLabel("Display name").fill("Changed Name");
   await page.getByLabel("Bio").fill("Updated profile");
   await page.getByRole("button", { name: "Save" }).click();

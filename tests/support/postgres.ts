@@ -5,8 +5,10 @@ import { resolve, sep } from "node:path";
 import { createServer } from "node:net";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { requireTestLoopback } from "./loopback.js";
 
 export async function startTestDatabase(options: { migrate?: boolean } = {}) {
+  await requireTestLoopback();
   const root = resolve("artifacts", "postgres");
   const databaseDir = resolve(root, randomUUID());
   // EmbeddedPostgres deletes only this fresh, verified test cluster on stop.
@@ -14,7 +16,10 @@ export async function startTestDatabase(options: { migrate?: boolean } = {}) {
     throw new Error("Invalid test database path");
   await mkdir(root, { recursive: true });
   const server = createServer();
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", resolve);
+  });
   const address = server.address();
   if (!address || typeof address === "string")
     throw new Error("No test port available");

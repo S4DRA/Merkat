@@ -33,6 +33,9 @@ Never put credentials in `NEXT_PUBLIC_*`. Next uses pooled DATABASE_URL, APP_ORI
 
 ## Documentation
 
+- [Implementation and recovery](MERKAT_IMPLEMENTATION_REPORT.md)
+- [Current test evidence](MERKAT_TEST_RESULTS.md)
+- [Production readiness and remaining gates](MERKAT_PRODUCTION_READINESS.md)
 - [Current feature condition, verification and release gates](docs/PRODUCTION_STATUS.md)
 - [Architecture](docs/architecture/foundation.md)
 - [Approved decisions](docs/decisions/0001-phase-1-foundation.md)

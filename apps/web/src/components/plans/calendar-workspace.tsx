@@ -108,6 +108,19 @@ export function EventForm({
     const form = new FormData(e.currentTarget);
     setError("");
     try {
+      const usernames = [
+        ...new Set(
+          String(form.get("invitees") ?? "")
+            .split(/[\s,]+/)
+            .map((name) => name.trim().replace(/^@/, "").toLowerCase())
+            .filter(Boolean),
+        ),
+      ];
+      if (
+        usernames.length > 30 ||
+        usernames.some((name) => !/^[a-z][a-z0-9_]{2,29}$/.test(name))
+      )
+        throw new Error("Enter up to 30 valid usernames, separated by commas.");
       const value = calendarFieldsSchema.parse({
         title: form.get("title"),
         description: form.get("description"),
@@ -125,6 +138,7 @@ export function EventForm({
           : {
               clientId: clientId.current,
               event: value,
+              ...(!scope ? { usernames } : {}),
               ...(scope ? { scope } : {}),
             },
       );
@@ -225,6 +239,23 @@ export function EventForm({
           defaultValue={event?.description ?? ""}
         />
       </label>
+      {!event && !scope && (
+        <label>
+          Invite people (optional)
+          <input
+            name="invitees"
+            maxLength={960}
+            placeholder="username, another_username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            aria-describedby="event-invite-help"
+          />
+          <small id="event-invite-help" className="supporting-copy">
+            Enter usernames separated by commas. Each person chooses whether to
+            join and add the plan to their calendar.
+          </small>
+        </label>
+      )}
       {error && (
         <p role="alert" className="account-error">
           {error}

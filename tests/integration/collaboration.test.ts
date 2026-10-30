@@ -24,6 +24,8 @@ import {
   createSecurityRepository,
 } from "@merkat/database";
 import { startTestDatabase } from "../support/postgres.js";
+import sharp from "sharp";
+import { normalizeAvatar } from "../../apps/web/src/lib/server/profile-image.js";
 
 if (!process.env.TEST_DATABASE_URL)
   throw Error("Use the isolated integration runner.");
@@ -60,7 +62,34 @@ test("profile settings persist, private profiles require a relationship and logo
     register(),
     register(),
   ]);
-  await messaging.open(a.token, { username: b.user.profile.username });
+  const direct = await messaging.open(a.token, {
+    username: b.user.profile.username,
+  });
+  const outgoing = {
+    conversationId: direct.id,
+    clientId: randomUUID(),
+    text: "Persist this direct message",
+  };
+  const sent = await messaging.send(a.token, outgoing);
+  assert.equal((await messaging.send(a.token, outgoing)).id, sent.id);
+  const reply = await messaging.send(b.token, {
+    conversationId: direct.id,
+    clientId: randomUUID(),
+    text: "A separate authenticated reply",
+  });
+  assert.ok(
+    (
+      await messaging.messages(a.token, { conversationId: direct.id })
+    ).messages.some((m) => m.id === reply.id),
+  );
+  assert.ok(
+    (
+      await messaging.messages(b.token, { conversationId: direct.id })
+    ).messages.some((m) => m.id === sent.id),
+  );
+  await assert.rejects(
+    messaging.messages(outsider.token, { conversationId: direct.id }),
+  );
   await profiles.updateSettings(hash(a.token), {
     ...defaultAppearance,
     theme: "DARK",
@@ -69,6 +98,43 @@ test("profile settings persist, private profiles require a relationship and logo
   });
   assert.equal((await profiles.settings(hash(a.token))).theme, "DARK");
   assert.equal((await profiles.view(hash(b.token), a.user.id)).id, a.user.id);
+  const png = await sharp({
+    create: { width: 32, height: 32, channels: 3, background: "orange" },
+  })
+    .png()
+    .toBuffer();
+  const image = await normalizeAvatar(png, "image/png");
+  await profiles.reserveAvatarUpload(hash(a.token));
+  const saved = await profiles.saveAvatar(hash(a.token), image);
+  assert.match(saved.avatarRef!, /^\/api\/avatars\//);
+  assert.deepEqual(
+    Buffer.from((await profiles.avatar(hash(b.token), a.user.id)).bytes),
+    image,
+  );
+  await assert.rejects(profiles.avatar(hash(outsider.token), a.user.id));
+  const independent = createDatabase({ DATABASE_URL: cluster.url });
+  try {
+    assert.equal(
+      (await createProfileRepository(independent).settings(hash(a.token)))
+        .largeText,
+      true,
+    );
+    assert.deepEqual(
+      Buffer.from(
+        (
+          await createProfileRepository(independent).avatar(
+            hash(b.token),
+            a.user.id,
+          )
+        ).bytes,
+      ),
+      image,
+    );
+  } finally {
+    await independent.$disconnect();
+  }
+  await profiles.saveAvatar(hash(a.token), null);
+  await assert.rejects(profiles.avatar(hash(b.token), a.user.id));
   await assert.rejects(profiles.view(hash(outsider.token), a.user.id));
   const session = await db.session.findUniqueOrThrow({
     where: { tokenHash: hash(a.token) },
@@ -134,13 +200,36 @@ test("calendar retries, subscription semantics, reminder dedupe and cancellation
     2,
   );
   const due = new Date(startsAt.getTime() - 24 * 3600000 + 1000);
-  assert.equal((await calendar.deliverDue(due)).delivered, 2);
+  const concurrent = await Promise.all([
+    calendar.deliverDue(due),
+    createCalendarRepository(db).deliverDue(due),
+  ]);
+  assert.equal(
+    concurrent.reduce((n, r) => n + r.delivered, 0),
+    2,
+  );
   assert.equal((await calendar.deliverDue(due)).delivered, 0);
   assert.equal(
     await db.notification.count({
       where: { planId: event.id, dedupeKey: { startsWith: "reminder:" } },
     }),
     2,
+  );
+  // A newly constructed worker reads the same durable five-hour rows.
+  const fiveHours = new Date(startsAt.getTime() - 5 * 3600000 + 1000);
+  assert.equal(
+    (await createCalendarRepository(db).deliverDue(fiveHours)).delivered,
+    2,
+  );
+  assert.equal(
+    (await createCalendarRepository(db).deliverDue(fiveHours)).delivered,
+    0,
+  );
+  assert.equal(
+    await db.notification.count({
+      where: { planId: event.id, dedupeKey: { startsWith: "reminder:" } },
+    }),
+    4,
   );
   await assert.rejects(
     calendar.edit(hash(b.token), {
@@ -159,6 +248,52 @@ test("calendar retries, subscription semantics, reminder dedupe and cancellation
     }),
     0,
   );
+  const personal = await calendar.create(hash(a.token), {
+    clientId: randomUUID(),
+    event: input.event,
+    usernames: [b.user.profile.username],
+  });
+  assert.equal(
+    personal.participants.find((p) => p.userId === b.user.id)?.response,
+    "INVITED",
+  );
+  assert.equal(
+    personal.participants.find((p) => p.userId === b.user.id)?.subscribed,
+    false,
+  );
+  const shared = await calendar.share(hash(a.token), {
+    id: personal.id,
+    clientId: randomUUID(),
+    scope: input.scope,
+  });
+  assert.equal(shared.scope?.id, direct.id);
+  assert.ok(shared.participants.some((p) => p.userId === b.user.id));
+  const revised = await calendar.edit(hash(a.token), {
+    id: personal.id,
+    version: personal.version,
+    event: {
+      ...input.event,
+      startsAt: new Date(startsAt.getTime() + 86400000).toISOString(),
+      endsAt: new Date(endsAt.getTime() + 86400000).toISOString(),
+    },
+  });
+  assert.equal(revised.version, 2);
+  assert.equal(
+    await db.planReminder.count({
+      where: { planId: personal.id, version: 1, state: "PENDING" },
+    }),
+    0,
+  );
+  assert.equal(
+    await db.planReminder.count({
+      where: { planId: personal.id, version: 2, state: "PENDING" },
+    }),
+    2,
+  );
+  await calendar.cancel(hash(a.token), {
+    id: personal.id,
+    version: revised.version,
+  });
 });
 
 test("group tab consent, 1350 TRY settlement, closed history and member removal are enforced", async () => {
@@ -188,6 +323,28 @@ test("group tab consent, 1350 TRY settlement, closed history and member removal 
     id: group.id,
     channelId: group.channels[0]!.id,
   };
+  const messages = await Promise.all(
+    [a, b, c].map((user) =>
+      groups.send(user.token, {
+        groupId: group.id,
+        channelId: scope.channelId,
+        clientId: randomUUID(),
+        text: `Hello from ${user.user.id}`,
+      }),
+    ),
+  );
+  assert.equal(new Set(messages.map((m) => m.sequence)).size, 3);
+  for (const user of [a, b, c]) {
+    const history = await groups.messages(user.token, {
+      groupId: group.id,
+      channelId: scope.channelId,
+    });
+    assert.ok(
+      messages.every((m) =>
+        history.messages.some((saved) => saved.id === m.id),
+      ),
+    );
+  }
   await assert.rejects(
     tabs.create(hash(b.token), {
       clientId: randomUUID(),
@@ -264,6 +421,71 @@ test("group tab consent, 1350 TRY settlement, closed history and member removal 
     settlementId: repayment.id,
   });
   assert.deepEqual((tab as TabView).state.snapshot, snapshot);
+  let concurrentTab = await tabs.create(hash(a.token), {
+    clientId: randomUUID(),
+    title: "Concurrent edits",
+    currency: "TRY",
+    scope,
+    participantIds: [a.user.id, b.user.id, c.user.id],
+  });
+  const attempts = [b, c].map((user) => ({
+    user,
+    body: {
+      id: concurrentTab.id,
+      clientId: randomUUID(),
+      version: concurrentTab.version,
+      action: own(user.user.id, "One-cent item", 1),
+    },
+  }));
+  const results = await Promise.allSettled(
+    attempts.map(({ user, body }) => tabs.act(hash(user.token), body)),
+  );
+  assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
+  assert.equal(results.filter((r) => r.status === "rejected").length, 1);
+  const winner = attempts[results.findIndex((r) => r.status === "fulfilled")]!;
+  concurrentTab = await tabs.act(hash(winner.user.token), winner.body);
+  assert.equal(
+    concurrentTab.state.orders.length,
+    1,
+    "retry must not duplicate the committed order",
+  );
+  concurrentTab = await tabs.act(hash(a.token), {
+    id: concurrentTab.id,
+    clientId: randomUUID(),
+    version: concurrentTab.version,
+    action: {
+      kind: "ORDER",
+      name: "Uneven split",
+      unitPrice: 10001,
+      quantity: 1,
+      split: "EQUAL",
+      allocations: [a, b, c].map((u) => ({ userId: u.user.id })),
+    },
+  });
+  const proposed = concurrentTab.state.orders.find(
+    (o) => o.name === "Uneven split",
+  )!;
+  assert.equal(
+    proposed.allocations.reduce((n, p) => n + p.amount, 0),
+    10001,
+  );
+  concurrentTab = await tabs.act(hash(b.token), {
+    id: concurrentTab.id,
+    clientId: randomUUID(),
+    version: concurrentTab.version,
+    action: { kind: "ACCEPT_ORDER", orderId: proposed.id, accept: false },
+  });
+  assert.equal(
+    concurrentTab.state.orders.find((o) => o.id === proposed.id)!.status,
+    "CANCELLED",
+  );
+  assert.equal(concurrentTab.summary.total, 1);
+  await tabs.act(hash(a.token), {
+    id: concurrentTab.id,
+    clientId: randomUUID(),
+    version: concurrentTab.version,
+    action: { kind: "CLOSE", confirm: true },
+  });
   await groups.member(a.token, {
     groupId: group.id,
     userId: c.user.id,
@@ -275,7 +497,19 @@ test("group tab consent, 1350 TRY settlement, closed history and member removal 
 test("recovery codes are hashed, single-use and revoke previous sessions", async () => {
   const a = await register(),
     h = hash(a.token);
-  const { codes } = await security.generate(h, { currentPassword: password });
+  const second = await auth.login(
+    { username: a.user.profile.username, password },
+    randomUUID(),
+  );
+  await security.change(h, {
+    currentPassword: password,
+    newPassword: "another strong private test password",
+  });
+  assert.equal(await accounts.current(second.token), null);
+  assert.equal((await accounts.current(a.token))?.id, a.user.id);
+  const { codes } = await security.generate(h, {
+    currentPassword: "another strong private test password",
+  });
   assert.equal(codes.length, 8);
   assert.equal((await security.status(h)).remainingCodes, 8);
   const stored = await db.recoveryCode.findMany({

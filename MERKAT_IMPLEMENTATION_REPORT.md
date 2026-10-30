@@ -1,102 +1,50 @@
 # MERKAT implementation report
 
-## Current result: local-only 503 repair
+October 30, 2026, Europe/Istanbul. Continuation baseline: `466a2ac9b1ce4a06f2cc60c5154b967c935edf31`.
 
-The latest user brief changes this task's boundary to isolated local development.
-The normal dev command now starts the existing owned, persistent, fully migrated
-PostgreSQL launcher instead of using the hosted environment file. Actual local
-HTTP/browser checks and a PostgreSQL/app restart confirm real DM/group lists and
-history persist. See `MERKAT_LOCAL_503_REPORT.md` for exact root cause, files,
-configuration boundaries, regression evidence and reproducible commands.
+## Recovery and preservation
 
-The production discussion below is historical context, not a pending prerequisite
-for this local fix. Production was not contacted or modified in this repair.
+The baseline commit was recovered with a clean working tree. The repository was on `master`, without a configured remote. The requested `new-chat/work/merkat-audit` had previously described its folder; a continuation branch with that exact name has now been created. `master` retains the baseline. No reset, source replacement or production migration was performed.
 
-October 30, 2026. Scope: diagnose and repair the production Retry failures reported
-for chats and groups, using the attached mobile/calendar brief as preservation
-and architecture context. The user clarified the observed failure during the audit.
+Working checkout: `C:\Users\s4dra\Documents\Codex\2026-10-30\new-chat\work\merkat-audit`. The original D: checkout was not modified. An archive of the exact recovered commit was saved privately before changes. The final archive includes the full source, a Git bundle for history recovery, revision metadata, these reports and textual verification evidence. It excludes installed dependencies, generated builds/Prisma clients, personal environment files and local test databases.
 
-## Repository and release identity
+The source was not pushed into the public GitHub repository. No production infrastructure, deployment, production users or production data were changed.
 
-- Working checkout: `D:\Github Repo\Conduit\Merkat`.
-- Fix branch: `fix/production-chat-group-loading`; baseline `6ea62ba`.
-- Vercel confirms production uses baseline `6ea62ba`, not the brief's `a481829`.
-- Inspected the separate recovered `new-chat/work/merkat-audit` checkout at
-  `a481829`, including all three requested existing reports. It has no remote and
-  contains additional unreleased features/migrations. It was not edited or merged.
-- Full SHA for this repair is available with `git rev-parse HEAD`; a report cannot
-  embed its own commit hash without changing that hash.
+## Actual architecture
 
-## Findings and changes
+The active system is a Next.js App Router web application using React, shared contracts/backend packages, Prisma/PostgreSQL and private Supabase Broadcast invalidations. Database state is authoritative; clients refetch after invalidation. The worker processes durable reminder and push-delivery rows. Fastify remains a reference test application.
 
-**VERIFIED WORKING diagnosis:** production logs reproduce the reported affected
-endpoints. The configured Supabase project database lacks the existing seventh
-groups/privacy migration. A real local regression reproduces all three HTTP 503s
-from that exact schema gap and proves the existing migration plus runtime SQL
-restores HTTP 200s and preserves old messages.
+Matrix and phone code are inactive. The `/api/matrix` compatibility route does not establish a functioning Matrix homeserver integration. This continuation tests the active messaging architecture; it does not silently replace it or claim Matrix delivery. Restoring Matrix would require an explicit architecture/integration decision and real test infrastructure.
 
-**IMPLEMENTED, NOT LIVE-VERIFIED:** added `npm run db:check-runtime`, a read-only
-schema/role check derived from the generated Prisma scalar enums. It catches
-missing tables/columns, missing runtime grants/RLS policies, disabled RLS,
-application ownership/elevated roles and readable private reports. It does not
-require access to private data or migration metadata. It is an operator release
-gate, not an automatic Vercel build hook.
+## Preserved implementation
 
-**IMPLEMENTED, NOT LIVE-VERIFIED:** server failures now log the validated endpoint
-and an allowlisted error code. Responses remain generic/no-store; exception
-messages, metadata, request bodies and arbitrary Matrix paths are not logged.
+| Area                   | Behavior in source                                                                                                                                                                                                                                              | Verification limit                                                                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Accounts               | Username/password registration and login; email optional; no phone, email or OTP verification required. Argon2id credentials, hashed HttpOnly sessions and persistent rate limits.                                                                              | Real authenticated HTTP/DB acceptance blocked by host networking.                                                                                |
+| Profiles               | Editable identity/bio, related-person profile views and private avatars. Blocked/unrelated viewers are denied by repository checks.                                                                                                                             | Image processing is tested; private persistence has an added service test that could not execute.                                                |
+| Avatars                | PNG/JPG only; maximum 2,000,000 input bytes; actual signature/decode checks; bounded pixels/dimensions; normalized 512-square JPEG with metadata removed.                                                                                                       | Native image unit tests pass, including exact size and dimension boundaries. Real upload/DB/browser scenario remains blocked.                    |
+| Recovery/sessions      | Eight hashed single-use offline codes, current-password confirmation, password change, session revocation, logout push cleanup and session rotation.                                                                                                            | Added/expanded real-service scenarios; not executed here.                                                                                        |
+| Appearance and comfort | Light/dark/system, OS changes, larger text, reduced motion, responsive layouts, visible focus and dialog focus return.                                                                                                                                          | Component/browser checks pass; no full WCAG certification or screen-reader claim.                                                                |
+| Messaging/groups       | Existing persistent DM/group services, invitation acceptance, membership/role/privacy checks, ordered messages, dedupe and receipts.                                                                                                                            | Real group/DM service and HTTP tests are present but blocked. Hosted private realtime remains unverified.                                        |
+| Calendar               | Month/week/day/agenda; personal/DM/group events, invitations, RSVP, independent calendar subscription, edit/cancel, ICS export, native conversation cards and composer shortcuts. UTC storage with IANA display zones and explicit DST ambiguity/gap rejection. | UI and time calculations tested independently; real synchronization, invitation and service acceptance blocked.                                  |
+| Reminders              | Durable 24-hour and 5-hour jobs, versioning, opt-out, cancellation, unique notification keys and worker claims.                                                                                                                                                 | Deterministic service tests cover both offsets, duplicate workers and worker reconstruction; cannot execute without DB sockets.                  |
+| Spending tabs          | Chat-only entry, group-admin/owner or DM management, own/shared orders, equal/quantity/custom allocations, explicit consent, venue payments, recipient-confirmed repayments, closure snapshot and saved cards.                                                  | Integer calculation and SQL integrity pass. Real concurrency/consent/session-history tests remain blocked.                                       |
+| Notifications/push     | In-app inbox, explicit browser opt-in, session-bound subscriptions, durable delivery intents, retries/leases and dead-endpoint cleanup.                                                                                                                         | Unconfigured push is verified to fail closed. Scheduling, provider acceptance and device display are separate stages; actual push is unverified. |
 
-**VERIFIED WORKING locally:** added the real old-schema recovery test to the normal
-integration suite and extended the owned local database harness to start without
-automatically migrating only when requested by that test. Existing tests retain
-their default fully migrated setup.
+## Changes made during this continuation
 
-Documented the exact existing migration/runtime repair and its approval/access
-requirements in `infra/deployment/PRODUCTION_RECOVERY.md`; corrected the release
-instructions that still described only six migrations.
+1. Added a loopback preflight to the isolated PostgreSQL harness. It fails with `TEST_ENVIRONMENT_BLOCKED` before starting a database when the host rejects connections, preventing the previous stalled setup/cleanup cycle. It never converts a blocked test into a pass or skip.
+2. Fixed stale registration copy assertions and ambiguous Edit profile selectors in existing browser tests.
+3. Expanded the real collaboration integration suite: private-avatar bytes/settings across independent clients, two-way retry-safe DMs, three-user group messages, explicit invitations, both reminder offsets, duplicate/reconstructed workers, versioned rescheduling/cancellation, tab concurrency/idempotency/rounding/decline, closed snapshots, member removal, password change and recovery.
+4. Added a browser acceptance scenario using three independently authenticated contexts, real HTTPS Next routes and the isolated database. It has no mocked HTTP responses or fake realtime notifications. It explicitly reloads for persistence and does not claim hosted live delivery.
+5. Extended SQL verification to reopen the same cluster in a second PostgreSQL process and assert persisted users, closed expenses and used recovery codes. Checked server-role access through new-table RLS.
+6. Added exact-2-MB image and compressed-small/wide-dimension tests, and a fail-closed push test using a real lazy client without a live database.
+7. Expanded component checks for system theme changes, larger text and narrow/tablet layouts.
+8. Filled a product gap: personal event creation now exposes optional username invitations, reusing existing server validation and participant consent. Added form payload and service tests for it.
+9. Added a manually triggered GitHub Actions verification workflow with read-only repository permissions, isolated tests and no deployment steps. It was not dispatched or published remotely.
 
-## Files changed
+## Deliberate limits
 
-| Files                                                                                              | Purpose                                                                                |
-| -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `apps/web/src/lib/server/http-api.ts`, `request-failure.ts`                                        | Safe route/error-code diagnostics                                                      |
-| `packages/database/src/runtime-readiness.ts`, `index.ts`                                           | Read-only schema/runtime-role check and export                                         |
-| `scripts/check-runtime-database.mts`, root `package.json`                                          | Operator CLI and npm command                                                           |
-| `tests/integration/production-recovery.test.ts`, `tests/support/postgres.ts`, `run-integration.ts` | Real old-schema upgrade regression, isolated fixture option and normal-suite inclusion |
-| `infra/deployment/README.md`, `PRODUCTION_RECOVERY.md`                                             | Corrected seven-migration release gate and exact repair runbook                        |
-| Five root `MERKAT_*.md` reports                                                                    | Findings, current results, readiness and scoped UX/PWA inventories                     |
+Confirmed shared orders cannot be silently amended, and closed expense sessions cannot be reopened. There is no unanimous shared-expense correction workflow, tax/discount/refund automation, external payment processing, recurring-event editor, calls or media messaging. Tabs record obligations; they do not transfer money. Personal-event invitees can be selected at creation; there is no subsequent invitee-management screen.
 
-## Preserved scope
-
-No product screens, logos, navigation, messaging architecture, dependencies,
-Prisma schema or committed migrations were changed. No production data or
-infrastructure was modified, no deployment/push was made, and the recovered
-checkout remains untouched. The attached brief's new gestures/calendar/PWA work
-has not been silently imported into this production hotfix.
-
-See `MERKAT_TEST_RESULTS.md`, `MERKAT_UX_AUDIT.md`,
-`MERKAT_PWA_VERIFICATION.md` and `MERKAT_PRODUCTION_READINESS.md` for evidence and limits.
-
-## Follow-up: P2028 and session connection failures
-
-The user approved the production migration/runtime repair, then supplied local
-Next logs showing transaction acquisition failing at 2 seconds, missing schema
-and a 5-second connection failure during session lookup. Supabase is still not
-connected, so approved production execution remains blocked on owner access.
-
-Real local PostgreSQL/TCP fault tests were added before changing behavior. All
-three initial regressions failed: a 2.3-second handshake was rejected by Prisma's
-2-second default, a dropped session read failed instead of reconnecting, and a
-persistent outage made only one attempt. The fixes align transaction acquisition
-with the existing driver deadline and retry only the read-only session lookup
-once on known transient transport errors. Retries check current expiry; schema,
-authorization and transaction failures remain errors and writes are never replayed.
-
-Additional files: `packages/database/src/client.ts`, `account-repository.ts`,
-`connection-errors.ts`, `tests/integration/database-connections.test.ts`, the
-integration runner and the three implementation/test/readiness reports plus the
-recovery procedure. No schema, environment, pool size/mode, UI or branding edits.
-
-The shared package has been rebuilt. A running dev server needs a restart to
-replace its cached Prisma client. Production source has not been deployed; the
-production database is unchanged until owner access becomes available.
+The changes are a preserved, buildable candidate. They are not certified production-ready. See `MERKAT_TEST_RESULTS.md` for evidence and `MERKAT_PRODUCTION_READINESS.md` for release blockers.

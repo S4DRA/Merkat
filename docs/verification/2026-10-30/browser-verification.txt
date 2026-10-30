@@ -1,0 +1,30 @@
+
+> merkat@0.0.0 test:ui
+> playwright test --reporter=line
+
+
+[WebServer] (node:11452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:20172) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:20172) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[WebServer] C:\Users\s4dra\Documents\Codex\2026-10-30\new-chat\work\merkat-audit\tests\support\loopback.ts:18
+[WebServer]           new Error(
+[WebServer]           ^
+[WebServer] 
+[WebServer] 
+[WebServer] Error: TEST_ENVIRONMENT_BLOCKED: loopback unavailable (EACCES). Real service tests did not run.
+[WebServer]     at Socket.finish (C:\Users\s4dra\Documents\Codex\2026-10-30\new-chat\work\merkat-audit\tests\support\loopback.ts:18:11)
+[WebServer]     at Object.onceWrapper (node:events:633:26)
+[WebServer]     at Socket.emit (node:events:518:28)
+[WebServer]     at emitErrorNT (node:internal/streams/destroy:170:8)
+[WebServer]     at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+[WebServer]     at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[WebServer] 
+[WebServer] Node.js v22.17.0
+Error: Process from config.webServer was not able to start. Exit code: 1
+

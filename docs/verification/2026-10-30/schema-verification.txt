@@ -1,0 +1,12 @@
+
+> merkat@0.0.0 db:validate
+> npm run validate -w @merkat/database
+
+
+> @merkat/database@0.0.0 validate
+> prisma validate
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+The schema at prisma\schema.prisma is valid ≡ƒÜÇ

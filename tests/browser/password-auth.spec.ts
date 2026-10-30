@@ -18,7 +18,9 @@ for (const width of [320, 360, 390, 430]) {
       .click();
     await expect(page).toHaveURL(/\/register$/);
     await expect(
-      page.getByText("Lost passwords can’t be recovered."),
+      page.getByText(
+        "Optional recovery codes are available in Settings after joining.",
+      ),
     ).toBeVisible();
     const name = username();
     await expect(page.getByLabel("Display name")).toHaveCount(0);
@@ -86,7 +88,7 @@ for (const width of [320, 360, 390, 430]) {
     ).toHaveAttribute("src", "/brand/merkat-white-transparent.png");
     await nav.getByRole("link", { name: "Profile", exact: true }).click();
     await expect(page.getByText(`@${name}`, { exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Edit profile" }).click();
+    await page.getByRole("link", { name: "Edit profile" }).first().click();
     await page.getByLabel("Bio").fill("Real profile");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page).toHaveURL(/\/profile$/);

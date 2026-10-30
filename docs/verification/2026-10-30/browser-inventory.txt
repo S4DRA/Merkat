@@ -1,0 +1,60 @@
+
+> merkat@0.0.0 test:ui
+> playwright test --list
+
+Listing tests:
+  auth.spec.ts:3:1 ΓÇ║ signed-out routes redirect to real username/password login
+  auth.spec.ts:50:1 ΓÇ║ onboarding, profile save and logout use real sessions
+  collaboration.spec.ts:24:1 ΓÇ║ three authenticated users persist messages, calendar RSVP and a consented tab through real HTTP
+  friendships.spec.ts:6:3 ΓÇ║ real friend request, acceptance, messaging and removal at 320px (mock socket)
+  friendships.spec.ts:6:3 ΓÇ║ real friend request, acceptance, messaging and removal at 360px (mock socket)
+  friendships.spec.ts:6:3 ΓÇ║ real friend request, acceptance, messaging and removal at 390px (mock socket)
+  friendships.spec.ts:6:3 ΓÇ║ real friend request, acceptance, messaging and removal at 430px (mock socket)
+  groups.spec.ts:45:3 ΓÇ║ group messaging, replies, channel sheet, Back and reduced composer at 320px (mock transport)
+  groups.spec.ts:45:3 ΓÇ║ group messaging, replies, channel sheet, Back and reduced composer at 360px (mock transport)
+  groups.spec.ts:45:3 ΓÇ║ group messaging, replies, channel sheet, Back and reduced composer at 390px (mock transport)
+  groups.spec.ts:45:3 ΓÇ║ group messaging, replies, channel sheet, Back and reduced composer at 430px (mock transport)
+  groups.spec.ts:187:1 ΓÇ║ desktop group management, role controls and removed-member content denial (mock transport)
+  groups.spec.ts:253:1 ΓÇ║ group reconnect catches missed messages and ambiguous sends retry one persisted submission (mock transport)
+  groups.spec.ts:320:1 ΓÇ║ DM blocking/unblocking, private reports and settings remain functional (mock transport)
+  groups.spec.ts:392:1 ΓÇ║ group creation and invitation acceptance work through the approved New chat entry (mock transport)
+  groups.spec.ts:471:1 ΓÇ║ older history preserves scroll and incoming messages; desktop and touch keyboard behavior (mock transport)
+  groups.spec.ts:564:1 ΓÇ║ a delayed group receipt drains a newer visible cursor without a second notification (mock transport)
+  install.spec.ts:3:1 ΓÇ║ manifest, tab icon, Apple icon and square approved logo assets are available
+  install.spec.ts:49:1 ΓÇ║ install controls preserve user gesture, show manual guidance and hide in standalone mode
+  messaging.spec.ts:17:3 ΓÇ║ real two-account messaging, read state, Back and keyboard viewport at 320px (mock socket)
+  messaging.spec.ts:17:3 ΓÇ║ real two-account messaging, read state, Back and keyboard viewport at 360px (mock socket)
+  messaging.spec.ts:17:3 ΓÇ║ real two-account messaging, read state, Back and keyboard viewport at 390px (mock socket)
+  messaging.spec.ts:17:3 ΓÇ║ real two-account messaging, read state, Back and keyboard viewport at 430px (mock socket)
+  messaging.spec.ts:181:1 ΓÇ║ lost send response retries the same submission once; offline catch-up does not duplicate (mock socket)
+  messaging.spec.ts:251:1 ΓÇ║ older history, scroll restoration, new-message positioning, unavailable state and unauthorized URLs
+  messaging.spec.ts:333:1 ΓÇ║ conversation hides navigation and reclaims the desktop sidebar; inbox and other pages restore it
+  messaging.spec.ts:369:1 ΓÇ║ logout blocks content and capability renewal for an existing socket (mock socket)
+  migration.spec.ts:5:1 ΓÇ║ approved white transparent logo opens New chat in the new navigation order
+  migration.spec.ts:51:3 ΓÇ║ account inputs, errors, viewport resizing and back navigation at 320px
+  migration.spec.ts:51:3 ΓÇ║ account inputs, errors, viewport resizing and back navigation at 360px
+  migration.spec.ts:51:3 ΓÇ║ account inputs, errors, viewport resizing and back navigation at 390px
+  migration.spec.ts:51:3 ΓÇ║ account inputs, errors, viewport resizing and back navigation at 430px
+  migration.spec.ts:97:1 ΓÇ║ built Next server handles API aliases, Secure cookies and CSRF without Fastify
+  password-auth.spec.ts:10:3 ΓÇ║ real registration, immediate entry, profile and login at 320px
+  password-auth.spec.ts:10:3 ΓÇ║ real registration, immediate entry, profile and login at 360px
+  password-auth.spec.ts:10:3 ΓÇ║ real registration, immediate entry, profile and login at 390px
+  password-auth.spec.ts:10:3 ΓÇ║ real registration, immediate entry, profile and login at 430px
+  password-auth.spec.ts:146:1 ΓÇ║ registration validates optional email/reserved names, keeps inputs visible and recovers from network errors
+  password-auth.spec.ts:193:1 ΓÇ║ independent real login sessions survive another device signing out
+  password-auth.spec.ts:221:1 ΓÇ║ built production HTTP returns shared throttling and never authenticates rejected attempts
+  realtime-lifecycle.spec.ts:15:1 ΓÇ║ renews a real capability before its 90-second expiry (mock socket)
+  realtime-lifecycle.spec.ts:48:1 ΓÇ║ socket close automatically rejoins and reconciles missed messages without a notification (mock socket)
+  realtime-lifecycle.spec.ts:98:1 ΓÇ║ desktop Enter, Shift+Enter, composition and touch Enter preserve composer behavior
+  realtime-lifecycle.spec.ts:165:1 ΓÇ║ a failed receipt clears its error after socket recovery without manual Retry (mock socket)
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 320px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 360px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 390px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 430px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 768px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 1024px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 1280px
+  shell.spec.ts:5:3 ΓÇ║ navigation, panels and touch targets at 1440px
+  shell.spec.ts:76:1 ΓÇ║ keyboard, dialog focus, secondary routes and reduced motion
+  shell.spec.ts:151:1 ΓÇ║ mobile information and landscape remain usable
+Total: 54 tests in 10 files

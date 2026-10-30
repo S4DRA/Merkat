@@ -1,5 +1,7 @@
 # Merkat implementation and release status
 
+Continuation handoff: the root-level `MERKAT_IMPLEMENTATION_REPORT.md`, `MERKAT_TEST_RESULTS.md` and `MERKAT_PRODUCTION_READINESS.md` supersede this initial implementation report. The evidence below records the earlier 466a2ac pass; the continuation includes additional checks and explicit remaining blockers.
+
 Review date: October 30, 2026. Source baseline: local Phase 6 from October 17. This working copy adds the approved profile, appearance, calendar, security and spending-tab brief. It is a release candidate that still requires staging acceptance. No production release, hosted migration, production account creation or production data changes were performed.
 
 ## What was found

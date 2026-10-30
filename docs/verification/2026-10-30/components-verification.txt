@@ -1,0 +1,5 @@
+
+> merkat@0.0.0 test:components
+> node --conditions=react-server --import tsx tests/support/component-browser.ts
+
+{"componentChecks":40,"browserErrors":0,"transport":"Explicit mocked HTTP; not live end-to-end verification"}

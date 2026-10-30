@@ -1,0 +1,26 @@
+
+> @merkat/api@0.0.0 typecheck
+> tsc --noEmit
+
+
+> @merkat/web@0.0.0 typecheck
+> next typegen && tsc --noEmit
+
+Generating route types...
+Γ£ô Types generated successfully
+
+> @merkat/worker@0.0.0 typecheck
+> tsc --noEmit
+
+
+> @merkat/backend@0.0.0 typecheck
+> tsc --noEmit
+
+
+> @merkat/contracts@0.0.0 typecheck
+> tsc --noEmit
+
+
+> @merkat/database@0.0.0 typecheck
+> tsc --noEmit
+

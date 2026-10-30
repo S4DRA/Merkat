@@ -1,0 +1,22 @@
+
+> @merkat/database@0.0.0 generate
+> prisma generate
+
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma\schema.prisma.
+
+Γ£ö Generated Prisma Client (7.10.0) to .\src\generated in 272ms
+
+
+> @merkat/contracts@0.0.0 build
+> tsc
+
+
+> @merkat/backend@0.0.0 build
+> tsc
+
+
+> @merkat/database@0.0.0 build
+> tsc
+
