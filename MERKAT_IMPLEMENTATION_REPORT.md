@@ -1,5 +1,17 @@
 # MERKAT implementation report
 
+## Current result: local-only 503 repair
+
+The latest user brief changes this task's boundary to isolated local development.
+The normal dev command now starts the existing owned, persistent, fully migrated
+PostgreSQL launcher instead of using the hosted environment file. Actual local
+HTTP/browser checks and a PostgreSQL/app restart confirm real DM/group lists and
+history persist. See `MERKAT_LOCAL_503_REPORT.md` for exact root cause, files,
+configuration boundaries, regression evidence and reproducible commands.
+
+The production discussion below is historical context, not a pending prerequisite
+for this local fix. Production was not contacted or modified in this repair.
+
 October 30, 2026. Scope: diagnose and repair the production Retry failures reported
 for chats and groups, using the attached mobile/calendar brief as preservation
 and architecture context. The user clarified the observed failure during the audit.

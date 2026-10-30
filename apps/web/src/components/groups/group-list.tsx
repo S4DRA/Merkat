@@ -54,8 +54,10 @@ export function GroupInboxEntries({ revision }: { revision: number }) {
     const controller = new AbortController();
     directRequest<GroupList>("groups/list", {}, controller.signal)
       .then((value) => {
-        setList(value);
-        setError("");
+        if (!controller.signal.aborted) {
+          setList(value);
+          setError("");
+        }
       })
       .catch((e) => {
         if (!controller.signal.aborted) setError(directError(e));

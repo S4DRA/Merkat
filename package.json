@@ -11,9 +11,11 @@
     "npm": ">=11 <12"
   },
   "scripts": {
-    "dev": "npm run dev -w @merkat/web",
+    "dev": "tsx scripts/dev-local.mts",
     "dev:local": "tsx scripts/dev-local.mts",
     "predev:local": "npm run build:packages",
+    "dev:web": "npm run dev -w @merkat/web",
+    "predev:web": "npm run build:packages",
     "build": "npm run build:packages && npm run build -w @merkat/web",
     "start": "npm run start -w @merkat/web",
     "lint": "eslint . --max-warnings 0",

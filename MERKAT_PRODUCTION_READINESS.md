@@ -1,5 +1,12 @@
 # MERKAT production readiness
 
+**Current task is local-only.** The normal dev command now uses the owned local
+PostgreSQL launcher and all seven migrations. Real three-user HTTP/browser checks
+and a PostgreSQL/app restart pass. See `MERKAT_LOCAL_503_REPORT.md`. Local repair
+does not depend on production owner access. No production deployment or database
+contact was performed during this latest repair. The separate production gate
+below is historical and remains unclaimed.
+
 October 30, 2026. **APPROVED; BLOCKED on migration-owner access.** The user has
 explicitly approved the existing production database repair. Supabase remains
 disconnected and the available application credential cannot apply migrations.

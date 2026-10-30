@@ -70,6 +70,9 @@ for (const name of [
   "group_owner",
   "group_member",
   "group_outsider",
+  "acceptance_first",
+  "acceptance_second",
+  "acceptance_third",
 ]) {
   const session = await authentication.register(
     {

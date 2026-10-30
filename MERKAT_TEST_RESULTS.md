@@ -1,5 +1,20 @@
 # MERKAT test results
 
+## Latest local-only 503 repair
+
+Current scope and detailed evidence: `MERKAT_LOCAL_503_REPORT.md`. Real local
+acceptance returns 200 from DM/group lists using three accounts, and a full owned
+PostgreSQL/app restart preserves sessions, two DM messages and three group messages.
+The new real HTTP regression covers 401 for expired/absent sessions, 503 for an
+unavailable database, then recovery to persisted 200 results.
+
+Current final run: lint and typecheck pass; `npm test` passes **68 integration + 2
+API tests** with zero failures/skips; optimized production build passes. The full
+browser run passes **54 tests (2.4m)**, including the new three-user persistence,
+Retry and draft-preservation regression, recorded under
+`artifacts/local-fix-browser.log`. Earlier results
+below remain separately labeled history and do not replace this local acceptance.
+
 October 30, 2026, Europe/Istanbul. Current run on
 `fix/production-chat-group-loading`, baseline `6ea62ba`. Node **22.17.0**, npm
 **11.4.2**, existing locked dependencies. Results from the other recovered
