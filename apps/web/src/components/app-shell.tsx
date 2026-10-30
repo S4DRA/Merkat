@@ -36,16 +36,11 @@ export function AppShell({
         Skip to content
       </a>
       <header className="brand-header">
-        <Link href="/chats" aria-label="Merkat home" className="brand-link">
-          <Image
-            src="/brand/merkat-white-on-orange.png"
-            width={1536}
-            height={1024}
-            alt=""
-            priority
-          />
-          <span>MERKAT</span>
-        </Link>
+        <span className="brand-link">
+          <span>
+            {destination.id === "plans" ? "Calendar" : destination.label}
+          </span>
+        </span>
         <span className="brand-motto">TALK. PLAN. MEET.</span>
         <NotificationCenter />
         <Link
