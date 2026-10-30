@@ -1,0 +1,7 @@
+node_modules
+.next
+dist
+package-lock.json
+next-env.d.ts
+artifacts
+packages/database/src/generated

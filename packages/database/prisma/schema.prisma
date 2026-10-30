@@ -1,0 +1,367 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model User {
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  status                AccountStatus        @default(ACTIVE)
+  email                 String?              @db.VarChar(254)
+  createdAt             DateTime             @default(now()) @db.Timestamptz(3)
+  onboardingCompletedAt DateTime?            @db.Timestamptz(3)
+  profile               Profile?
+  externalIdentities    ExternalIdentity[]
+  sessions              Session[]
+  passwordCredential    PasswordCredential?
+  ownedPlans            Plan[]
+  planParticipations    PlanParticipant[]
+  directFirst           DirectConversation[] @relation("DirectFirst")
+  directSecond          DirectConversation[] @relation("DirectSecond")
+  directParticipations  DirectParticipant[]
+  messagingRateLimit    MessagingRateLimit?
+  friendsFirst          Friendship[]         @relation("FriendFirst")
+  friendsSecond         Friendship[]         @relation("FriendSecond")
+  friendRequests        Friendship[]         @relation("FriendRequester")
+  ownedGroups           ChatGroup[]          @relation("GroupOwner")
+  createdGroups         ChatGroup[]          @relation("GroupCreator")
+  groupMemberships      GroupMember[]
+  groupInvitations      GroupInvitation[]    @relation("GroupInvitee")
+  sentGroupInvitations  GroupInvitation[]    @relation("GroupInviter")
+  groupReadStates       GroupReadState[]
+  privacy               UserPrivacy?
+  blocks                UserBlock[]          @relation("Blocker")
+  blockedBy             UserBlock[]          @relation("Blocked")
+  reports               SafetyReport[]       @relation("Reporter")
+  reportedBy            SafetyReport[]       @relation("ReportedUser")
+}
+
+model Profile {
+  userId      String   @id @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  displayName String?  @db.VarChar(60)
+  username    String?  @unique @db.VarChar(30)
+  bio         String   @default("") @db.VarChar(160)
+  avatarRef   String?  @db.VarChar(512)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+}
+
+model ExternalIdentity {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  issuer    String   @db.VarChar(512)
+  subject   String   @db.VarChar(512)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@unique([issuer, subject])
+  @@index([userId])
+}
+
+model Session {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  tokenHash String    @unique @db.Char(64)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  expiresAt DateTime  @db.Timestamptz(3)
+  revokedAt DateTime? @db.Timestamptz(3)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model PasswordCredential {
+  userId       String   @id @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  passwordHash String   @db.VarChar(255)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+}
+
+model AuthRateLimit {
+  scope     String   @db.VarChar(24)
+  slot      Int
+  attempts  Int
+  expiresAt DateTime @db.Timestamptz(3)
+
+  @@id([scope, slot])
+}
+
+enum PlanResponse {
+  INVITED
+  GOING
+  MAYBE
+  DECLINED
+}
+
+model Plan {
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId        String            @db.Uuid
+  owner          User              @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  title          String            @db.VarChar(120)
+  description    String            @default("") @db.VarChar(2000)
+  location       String            @default("") @db.VarChar(200)
+  startsAt       DateTime          @db.Timestamptz(3)
+  endsAt         DateTime          @db.Timestamptz(3)
+  conversationId String?           @db.VarChar(512)
+  cancelled      Boolean           @default(false)
+  createdAt      DateTime          @default(now()) @db.Timestamptz(3)
+  participants   PlanParticipant[]
+
+  @@index([ownerId, startsAt])
+}
+
+model PlanParticipant {
+  planId   String       @db.Uuid
+  userId   String       @db.Uuid
+  plan     Plan         @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  response PlanResponse @default(INVITED)
+
+  @@id([planId, userId])
+  @@index([userId, planId])
+}
+
+model DirectConversation {
+  id           String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstUserId  String              @db.Uuid
+  secondUserId String              @db.Uuid
+  firstUser    User                @relation("DirectFirst", fields: [firstUserId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  secondUser   User                @relation("DirectSecond", fields: [secondUserId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  lastSequence Int                 @default(0)
+  createdAt    DateTime            @default(now()) @db.Timestamptz(3)
+  activityAt   DateTime            @default(now()) @db.Timestamptz(3)
+  participants DirectParticipant[]
+  messages     DirectMessage[]
+
+  @@unique([firstUserId, secondUserId])
+  @@index([secondUserId])
+  @@index([activityAt(sort: Desc), id(sort: Desc)])
+}
+
+model DirectParticipant {
+  conversationId    String             @db.Uuid
+  userId            String             @db.Uuid
+  conversation      DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  deliveredSequence Int                @default(0)
+  readSequence      Int                @default(0)
+  unreadCount       Int                @default(0)
+  messages          DirectMessage[]
+
+  @@id([conversationId, userId])
+  @@index([userId, conversationId])
+}
+
+model DirectMessage {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId String             @db.Uuid
+  senderId       String             @db.Uuid
+  clientId       String             @db.Uuid
+  sequence       Int
+  text           String             @db.VarChar(4000)
+  createdAt      DateTime           @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  conversation   DirectConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  sender         DirectParticipant  @relation(fields: [conversationId, senderId], references: [conversationId, userId], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([conversationId, sequence])
+  @@unique([conversationId, senderId, clientId])
+}
+
+model MessagingRateLimit {
+  userId          String   @id @db.Uuid
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  windowStartedAt DateTime @default(now()) @db.Timestamptz(3)
+  sentCount       Int      @default(0)
+  startedCount    Int      @default(0)
+  friendCount     Int      @default(0)
+  discoveryCount  Int      @default(0)
+  managedCount    Int      @default(0)
+  reportCount     Int      @default(0)
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+model Friendship {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstUserId   String           @db.Uuid
+  secondUserId  String           @db.Uuid
+  requestedById String           @db.Uuid
+  firstUser     User             @relation("FriendFirst", fields: [firstUserId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  secondUser    User             @relation("FriendSecond", fields: [secondUserId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  requestedBy   User             @relation("FriendRequester", fields: [requestedById], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  status        FriendshipStatus @default(PENDING)
+  createdAt     DateTime         @default(now()) @db.Timestamptz(3)
+  acceptedAt    DateTime?        @db.Timestamptz(3)
+
+  @@unique([firstUserId, secondUserId])
+  @@index([firstUserId, status, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([secondUserId, status, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([requestedById, status])
+}
+
+enum GroupRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum InvitationPolicy {
+  FRIENDS
+  EVERYONE
+  NOBODY
+}
+
+model ChatGroup {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId     String            @db.Uuid
+  owner       User              @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  createdById String            @db.Uuid
+  createdBy   User              @relation("GroupCreator", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  clientId    String            @db.Uuid
+  name        String            @db.VarChar(80)
+  description String            @default("") @db.VarChar(1000)
+  createdAt   DateTime          @default(now()) @db.Timestamptz(3)
+  activityAt  DateTime          @default(now()) @db.Timestamptz(3)
+  archivedAt  DateTime?         @db.Timestamptz(3)
+  members     GroupMember[]
+  channels    GroupChannel[]
+  invitations GroupInvitation[]
+  reports     SafetyReport[]
+
+  @@unique([createdById, clientId])
+  @@index([ownerId])
+  @@index([activityAt(sort: Desc), id(sort: Desc)])
+}
+
+model GroupMember {
+  groupId  String         @db.Uuid
+  userId   String         @db.Uuid
+  role     GroupRole      @default(MEMBER)
+  joinedAt DateTime       @default(now()) @db.Timestamptz(3)
+  leftAt   DateTime?      @db.Timestamptz(3)
+  group    ChatGroup      @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  messages GroupMessage[]
+
+  @@id([groupId, userId])
+  @@index([userId, leftAt, groupId])
+}
+
+model GroupChannel {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId      String           @db.Uuid
+  clientId     String           @db.Uuid
+  name         String           @db.VarChar(60)
+  position     Int
+  isDefault    Boolean          @default(false)
+  lastSequence Int              @default(0)
+  createdAt    DateTime         @default(now()) @db.Timestamptz(3)
+  activityAt   DateTime         @default(now()) @db.Timestamptz(3)
+  deletedAt    DateTime?        @db.Timestamptz(3)
+  group        ChatGroup        @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  messages     GroupMessage[]
+  readStates   GroupReadState[]
+
+  @@unique([groupId, id])
+  @@unique([groupId, clientId])
+  @@unique([groupId, position])
+  @@index([groupId, deletedAt, position])
+}
+
+model GroupMessage {
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId   String         @db.Uuid
+  channelId String         @db.Uuid
+  senderId  String         @db.Uuid
+  clientId  String         @db.Uuid
+  sequence  Int
+  text      String         @db.VarChar(4000)
+  createdAt DateTime       @default(dbgenerated("clock_timestamp()")) @db.Timestamptz(3)
+  replyToId String?        @db.Uuid
+  channel   GroupChannel   @relation(fields: [groupId, channelId], references: [groupId, id], onDelete: Cascade, onUpdate: Restrict)
+  sender    GroupMember    @relation(fields: [groupId, senderId], references: [groupId, userId], onDelete: Restrict, onUpdate: Restrict)
+  replyTo   GroupMessage?  @relation("GroupReply", fields: [replyToId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies   GroupMessage[] @relation("GroupReply")
+
+  @@unique([channelId, sequence])
+  @@unique([channelId, senderId, clientId])
+  @@index([groupId, senderId])
+  @@index([replyToId])
+}
+
+model GroupReadState {
+  channelId         String       @db.Uuid
+  userId            String       @db.Uuid
+  deliveredSequence Int          @default(0)
+  readSequence      Int          @default(0)
+  channel           GroupChannel @relation(fields: [channelId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@id([channelId, userId])
+  @@index([userId, channelId])
+}
+
+model GroupInvitation {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  groupId   String    @db.Uuid
+  userId    String    @db.Uuid
+  invitedBy String    @db.Uuid
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  user      User      @relation("GroupInvitee", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  inviter   User      @relation("GroupInviter", fields: [invitedBy], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@unique([groupId, userId])
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([invitedBy])
+}
+
+model UserPrivacy {
+  userId            String           @id @db.Uuid
+  allowNonFriendDms Boolean          @default(true)
+  groupInvitesFrom  InvitationPolicy @default(FRIENDS)
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+}
+
+model UserBlock {
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId, blockerId])
+}
+
+model SafetyReport {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reporterId    String     @db.Uuid
+  clientId      String     @db.Uuid
+  targetUserId  String?    @db.Uuid
+  targetGroupId String?    @db.Uuid
+  category      String     @db.VarChar(24)
+  reason        String     @db.VarChar(1000)
+  createdAt     DateTime   @default(now()) @db.Timestamptz(3)
+  reporter      User       @relation("Reporter", fields: [reporterId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  targetUser    User?      @relation("ReportedUser", fields: [targetUserId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  targetGroup   ChatGroup? @relation(fields: [targetGroupId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([reporterId, clientId])
+  @@index([targetUserId])
+  @@index([targetGroupId])
+  @@index([createdAt, id])
+}

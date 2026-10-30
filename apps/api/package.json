@@ -1,0 +1,18 @@
+{
+  "name": "@merkat/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/app.test.ts"
+  },
+  "devDependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@merkat/backend": "*",
+    "@merkat/contracts": "*",
+    "@merkat/database": "*",
+    "fastify": "5.12.3",
+    "zod": "^4.1.0"
+  }
+}

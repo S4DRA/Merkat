@@ -1,0 +1,54 @@
+:root {
+  --color-primary: #f55105;
+  --color-primary-pressed: #cf4000;
+  --color-white: #fff;
+  --color-canvas: #f6f5f1;
+  --surface-content: #fff;
+  --surface-raised: #eeede8;
+  --color-accent-soft: #fff0e7;
+  --color-accent-text: #ad3500;
+  --color-online: #178346;
+  --foreground-muted: #6b6a65;
+  --focus-ring: 2px solid #0a0a0a;
+  --touch-target: 44px;
+  --icon-small: 18px;
+  --icon-medium: 22px;
+  --icon-large: 28px;
+  --color-ink: #0a0a0a;
+  --color-neutral-900: #1e1e1e;
+  --color-neutral-600: #666;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-100: #efefec;
+  --color-border: #d4d4d4;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", monospace;
+  --text-caption: 0.75rem;
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-heading: 2rem;
+  --text-display: clamp(2rem, 3.2vw, 3rem);
+  --line-body: 1.5;
+  --line-heading: 1.02;
+  --border-width: 1px;
+  --border-strong: 2px;
+  --radius-small: 3px;
+  --radius-control: 6px;
+  --shadow-pressed: inset 0 2px 0 rgb(0 0 0 / 15%);
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-normal: 0ms;
+  }
+}

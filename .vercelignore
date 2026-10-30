@@ -1,0 +1,17 @@
+.git
+.agents
+.claude
+.windsurf
+.vercel
+node_modules
+**/node_modules
+**/.next
+**/dist
+artifacts
+tests
+docs
+infra/local
+**/.env
+**/.env.*
+**/*.log
+**/*.tsbuildinfo

@@ -1,0 +1,104 @@
+.destination--create {
+  width: 64px;
+  min-height: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+}
+.destination--create:hover {
+  background: var(--color-primary-pressed);
+}
+.destination--create:active {
+  box-shadow: var(--shadow-pressed);
+}
+.destination--create .nav-logo {
+  width: 54px;
+  height: 36px;
+  object-fit: contain;
+}
+@media (max-width: 767px) {
+  .primary-navigation {
+    position: relative;
+    gap: 0;
+    margin: 30px max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+    padding: 9px 5px;
+    height: 72px;
+    border: 0;
+    border-radius: 25px;
+    background: #252525;
+    color: white;
+  }
+  .primary-navigation .destination {
+    min-height: 52px;
+    min-width: 44px;
+    height: 52px;
+    color: #e3e3e3;
+    border-radius: 14px;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .primary-navigation .destination:hover {
+    background: #353535;
+  }
+  .primary-navigation .destination:active {
+    background: #404040;
+  }
+  .primary-navigation .destination[aria-current] {
+    background: transparent;
+    color: #ff804b;
+  }
+  .primary-navigation .destination[aria-current] svg {
+    color: #ff804b;
+  }
+  .primary-navigation .destination[aria-current]::before {
+    top: -9px;
+    width: 18px;
+    height: 3px;
+    background: var(--color-primary);
+  }
+  .primary-navigation .destination:focus-visible {
+    outline: 2px solid #ffad85;
+    outline-offset: 1px;
+  }
+  .primary-navigation .destination--create {
+    width: 70px;
+    height: 70px;
+    min-height: 70px;
+    border: 6px solid var(--color-canvas);
+    border-radius: 50%;
+    background: var(--color-primary);
+    position: absolute;
+    left: calc(50% - 35px);
+    top: -29px;
+    z-index: 1;
+  }
+  .primary-navigation .destination--create:hover {
+    background: var(--color-primary-pressed);
+  }
+  .primary-navigation .destination:nth-child(4) {
+    grid-column: 4;
+  }
+  .primary-navigation .destination:nth-child(5) {
+    grid-column: 5;
+  }
+  .primary-navigation .destination--create:focus-visible {
+    outline-offset: 3px;
+  }
+  .app-shell:has(.direct-workspace, .friends-workspace) .brand-header {
+    display: none;
+  }
+}
+.app-shell:has([data-conversation-open="true"]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app-shell:has([data-conversation-open="true"]) .primary-navigation {
+  display: none;
+}
+.app-shell:has([data-conversation-open="true"]) .direct-composer {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}

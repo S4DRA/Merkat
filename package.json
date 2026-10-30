@@ -1,0 +1,57 @@
+{
+  "name": "merkat",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.17.0 <23",
+    "npm": ">=11 <12"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @merkat/web",
+    "dev:local": "tsx scripts/dev-local.mts",
+    "predev:local": "npm run build:packages",
+    "build": "npm run build:packages && npm run build -w @merkat/web",
+    "start": "npm run start -w @merkat/web",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present && tsc -p tests/tsconfig.json",
+    "test": "npm run test --workspaces --if-present && npm run test:integration",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:ui": "playwright test",
+    "test:unconfigured": "tsx tests/support/check-unconfigured.ts",
+    "build:packages": "npm run generate -w @merkat/database && npm run build -w @merkat/contracts -w @merkat/backend -w @merkat/database",
+    "predev": "npm run build:packages",
+    "db:migrate": "npm run migrate -w @merkat/database",
+    "db:validate": "npm run validate -w @merkat/database",
+    "test:integration": "tsx tests/support/run-integration.ts",
+    "pretest": "npm run build:packages"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.2.0",
+    "deepmerge-ts": "8.0.2",
+    "embedded-postgres": "18.4.0-beta.17",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.1",
+    "prettier": "^3.6.0",
+    "prisma": "7.10.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.0"
+  },
+  "overrides": {
+    "mysql2": "3.24.4",
+    "deepmerge-ts": "8.0.2"
+  },
+  "dependencies": {
+    "@supabase/server": "1.6.0",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0"
+  }
+}

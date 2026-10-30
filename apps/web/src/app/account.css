@@ -1,0 +1,105 @@
+.account-page {
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  display: grid;
+  place-items: center;
+}
+.account-card {
+  width: min(100%, 400px);
+  display: grid;
+  gap: 28px;
+}
+.account-form {
+  display: grid;
+  gap: 18px;
+}
+.account-form label {
+  display: grid;
+  gap: 8px;
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.account-form input,
+.account-form textarea {
+  scroll-margin-block: 24px;
+  width: 100%;
+  min-height: var(--touch-target);
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--surface-content);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 16px;
+}
+.account-form textarea {
+  resize: vertical;
+}
+.account-form textarea:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 4px;
+}
+.account-form input:disabled {
+  background: var(--surface-raised);
+}
+.account-form small,
+.account-form [role="status"] {
+  font-size: 12px;
+  color: var(--foreground-muted);
+}
+.account-error {
+  color: #a52222;
+  font-size: var(--text-small);
+}
+.account-controls {
+  display: grid;
+  gap: 14px;
+}
+.account-controls p {
+  overflow-wrap: anywhere;
+}
+.auth-field {
+  display: grid;
+  gap: 8px;
+}
+.auth-field > label {
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.password-control {
+  position: relative;
+}
+.password-control input {
+  padding-right: 56px;
+}
+.password-toggle {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
+  width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  display: grid;
+  place-items: center;
+}
+.auth-form .auth-field-error {
+  color: #a52222;
+}
+.auth-form [aria-invalid="true"] {
+  border-color: #a52222;
+}
+.auth-recovery {
+  font-size: var(--text-small);
+}
+.auth-feedback {
+  min-height: 42px;
+}
+.auth-switch {
+  justify-self: start;
+  margin-top: 0;
+}

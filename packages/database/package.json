@@ -1,0 +1,30 @@
+{
+  "name": "@merkat/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Server-only PostgreSQL, Prisma and account persistence",
+  "dependencies": {
+    "@merkat/backend": "*",
+    "@merkat/contracts": "*",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "pg": "8.23.0",
+    "pg-connection-string": "2.14.0",
+    "zod": "4.6.2"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1"
+  },
+  "type": "module",
+  "scripts": {
+    "generate": "prisma generate",
+    "validate": "prisma validate",
+    "migrate": "prisma migrate deploy",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js"
+  }
+}
