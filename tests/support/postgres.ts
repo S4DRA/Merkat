@@ -6,7 +6,7 @@ import { createServer } from "node:net";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-export async function startTestDatabase() {
+export async function startTestDatabase(options: { migrate?: boolean } = {}) {
   const root = resolve("artifacts", "postgres");
   const databaseDir = resolve(root, randomUUID());
   // EmbeddedPostgres deletes only this fresh, verified test cluster on stop.
@@ -41,14 +41,15 @@ export async function startTestDatabase() {
     await database.initialise();
     await database.start();
     const url = `postgresql://${user}:${password}@127.0.0.1:${port}/postgres`;
-    await promisify(execFile)(
-      process.execPath,
-      [resolve("node_modules/prisma/build/index.js"), "migrate", "deploy"],
-      {
-        cwd: resolve("packages/database"),
-        env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url },
-      },
-    );
+    if (options.migrate !== false)
+      await promisify(execFile)(
+        process.execPath,
+        [resolve("node_modules/prisma/build/index.js"), "migrate", "deploy"],
+        {
+          cwd: resolve("packages/database"),
+          env: { ...process.env, DATABASE_URL: url, DIRECT_URL: url },
+        },
+      );
     return { url, stop: () => database.stop() };
   } catch (error) {
     await database.stop();

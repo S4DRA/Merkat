@@ -8,3 +8,4 @@ export { createMessagingRepository } from "./messaging-repository.js";
 export { createFriendshipRepository } from "./friendship-repository.js";
 export { createGroupRepository } from "./group-repository.js";
 export { createPrivacyRepository } from "./privacy-repository.js";
+export { checkRuntimeDatabase } from "./runtime-readiness.js";

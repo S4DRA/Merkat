@@ -12,6 +12,7 @@ import { sessionCookieName } from "@merkat/contracts";
 import { readWebEnvironment } from "../environment";
 import { getServices, type Services } from "./runtime";
 import { authenticationSource } from "./authentication-environment";
+import { requestFailureCode } from "./request-failure";
 import {
   issueRealtimeCapability,
   realtimeConfigured,
@@ -372,8 +373,12 @@ export function createApiHandler(
               ? 403
               : 400,
         );
-      // Fixed text only: never exception messages, request URLs, credentials or bodies.
-      console.error("Merkat API request failed.");
+      // Validated route keys and allowlisted codes only, never exception messages,
+      // arbitrary Matrix paths, request URLs, credentials, metadata or bodies.
+      console.error("Merkat API request failed.", {
+        endpoint: Object.hasOwn(methods, endpoint) ? endpoint : "matrix",
+        code: requestFailureCode(error),
+      });
       return json({ error: "SERVICE_UNAVAILABLE" }, 503);
     }
   };

@@ -4,6 +4,15 @@ Target: Next.js App Router on Vercel, Supabase PostgreSQL through Prisma. No
 standalone API, worker, custom production server, poller or Redis is required.
 No deployment is authorized or performed in this phase.
 
+**Groups/privacy release requirement:** the deployed Phase 6 source requires all
+seven migrations, including `202610170003_groups_privacy`, followed by the reviewed
+`infra/supabase/groups-privacy.sql` runtime permissions and private invalidations.
+Deploying the source against the six-migration database breaks existing DMs,
+groups and username discovery. See [the recovery procedure](PRODUCTION_RECOVERY.md).
+Run `npm run db:check-runtime` with the reviewed application's restricted
+`DATABASE_URL` before releasing; this read-only check must exit zero. It does not
+replace multi-user or hosted realtime acceptance.
+
 | Setting                                     | Value                                                        |
 | ------------------------------------------- | ------------------------------------------------------------ |
 | Framework preset                            | Next.js                                                      |

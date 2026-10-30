@@ -27,6 +27,7 @@
     "predev": "npm run build:packages",
     "db:migrate": "npm run migrate -w @merkat/database",
     "db:validate": "npm run validate -w @merkat/database",
+    "db:check-runtime": "tsx scripts/check-runtime-database.mts",
     "test:integration": "tsx tests/support/run-integration.ts",
     "pretest": "npm run build:packages"
   },

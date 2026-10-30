@@ -17,6 +17,7 @@ try {
       "tests/integration/messaging.test.ts",
       "tests/integration/friendships.test.ts",
       "tests/integration/groups-privacy.test.ts",
+      "tests/integration/production-recovery.test.ts",
     ],
     {
       stdio: "inherit",
