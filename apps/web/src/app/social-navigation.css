@@ -20,10 +20,25 @@
   object-fit: contain;
 }
 @media (max-width: 767px) {
+  .app-shell {
+    --floating-navigation-space: calc(124px + max(12px, env(safe-area-inset-bottom)));
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .app-shell:has([data-conversation-open="true"]) {
+    --floating-navigation-space: 0px;
+  }
+  .app-shell:has(.direct-workspace) {
+    background: var(--surface-content);
+  }
   .primary-navigation {
-    position: relative;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    grid-row: auto;
+    z-index: 20;
     gap: 0;
-    margin: 30px max(12px, env(safe-area-inset-right))
+    margin: 36px max(12px, env(safe-area-inset-right))
       max(12px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
     padding: 9px 5px;

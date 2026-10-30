@@ -17,10 +17,11 @@ import {
   DirectRequestError,
 } from "../../lib/direct-client";
 import { useDirectRealtime } from "../chats/use-direct-realtime";
-import { ChatsWorkspace } from "../chats/chats-workspace";
+import { ChatsWorkspace, type DirectMemory } from "../chats/chats-workspace";
 import { SocialDialog } from "../privacy-controls";
 import { GroupRows } from "./group-list";
 import { GroupSettings } from "./group-settings";
+import { PeoplePicker } from "../people-picker";
 import {
   GroupThread,
   type GroupPosition,
@@ -57,6 +58,18 @@ export function ChatsSurface({ userId }: { userId: string }) {
   const params = useSearchParams();
   const group = params.get("group");
   const memory = useGroupMemory();
+  const [directMemory, setDirectMemory] = useState<DirectMemory>(() => ({
+    threads: new Map(),
+    positions: new Map(),
+  }));
+  const remember = useCallback<
+    NonNullable<Parameters<typeof ChatsWorkspace>[0]["remember"]>
+  >((id, thread, position) => {
+    setDirectMemory((old) => ({
+      threads: thread ? new Map(old.threads).set(id, thread) : old.threads,
+      positions: new Map(old.positions).set(id, position),
+    }));
+  }, []);
   return group ? (
     <GroupsWorkspace
       key={group}
@@ -66,7 +79,11 @@ export function ChatsSurface({ userId }: { userId: string }) {
       saveMemory={memory.save}
     />
   ) : (
-    <ChatsWorkspace userId={userId} />
+    <ChatsWorkspace
+      userId={userId}
+      initialMemory={directMemory}
+      remember={remember}
+    />
   );
 }
 export function GroupsSurface({ userId }: { userId: string }) {
@@ -464,10 +481,16 @@ function CreateGroup({
     [description, setDescription] = useState(""),
     [pending, setPending] = useState(false),
     [error, setError] = useState("");
+  const [people, setPeople] = useState<string[]>([]);
+  const [review, setReview] = useState(false);
   const clientId = useRef("");
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (pending) return;
+    if (!review) {
+      setReview(true);
+      return;
+    }
     setPending(true);
     setError("");
     clientId.current ||= crypto.randomUUID();
@@ -477,6 +500,7 @@ function CreateGroup({
           clientId: clientId.current,
           name,
           description,
+          usernames: people,
         }),
       );
     } catch (e) {
@@ -488,28 +512,55 @@ function CreateGroup({
   return (
     <SocialDialog title="Create group" close={close}>
       <form className="social-form" onSubmit={(e) => void submit(e)}>
-        <label>
-          Group name
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={80}
-            required
-            autoFocus
-            disabled={pending}
-          />
-        </label>
-        <label>
-          Description (optional)
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={1000}
-            disabled={pending}
-          />
-        </label>
+        {!review ? (
+          <>
+            <label>
+              Group name
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                required
+                autoFocus
+                disabled={pending}
+              />
+            </label>
+            <label>
+              Description (optional)
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={1000}
+                disabled={pending}
+              />
+            </label>
+            <PeoplePicker
+              value={people}
+              onChange={setPeople}
+              disabled={pending}
+              limit={20}
+            />
+          </>
+        ) : (
+          <section aria-label="Review group">
+            <h3>{name}</h3>
+            <p>{description}</p>
+            <h4>{people.length} invitations</h4>
+            {people.map((person) => (
+              <p key={person}>@{person}</p>
+            ))}
+            <p>People are invited and must accept before joining.</p>
+            <Button
+              type="button"
+              disabled={pending}
+              onClick={() => setReview(false)}
+            >
+              Back to details
+            </Button>
+          </section>
+        )}
         <Button type="submit" variant="primary" loading={pending}>
-          Create group
+          {review ? "Create group" : "Review group"}
         </Button>
         {error && <p role="alert">{error}</p>}
       </form>

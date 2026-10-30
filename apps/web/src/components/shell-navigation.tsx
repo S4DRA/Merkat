@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { QuickCreate } from "./quick-create";
 import {
   CalendarDays,
   MessageCircle,
@@ -32,26 +32,7 @@ export function ShellNavigation({
   return (
     <nav className="primary-navigation" aria-label="Main navigation">
       {navigationDestinations("classic").map((item) => {
-        if (item.id === "new-chat")
-          return (
-            <Link
-              key={item.id}
-              className="destination destination--create"
-              href={item.href}
-              aria-label="New chat"
-              scroll={false}
-            >
-              <Image
-                className="nav-logo"
-                src="/brand/merkat-white-transparent.png"
-                alt=""
-                aria-hidden="true"
-                width={54}
-                height={36}
-                unoptimized
-              />
-            </Link>
-          );
+        if (item.id === "new-chat") return <QuickCreate key={item.id} />;
         const Icon = destinationIcons[item.id];
         return (
           <Link

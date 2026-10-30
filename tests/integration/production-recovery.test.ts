@@ -26,7 +26,7 @@ import { createApiHandler } from "../../apps/web/src/lib/server/http-api.js";
 import { requestFailureCode } from "../../apps/web/src/lib/server/request-failure.js";
 import { startTestDatabase } from "../support/postgres.js";
 
-test("existing six-migration database reproduces production failures; reviewed migration and runtime setup restore chats/groups without losing history", async () => {
+test("existing six-migration database reproduces failures; reviewed migrations and runtime setup restore the current app without losing history", async () => {
   const cluster = await startTestDatabase({ migrate: false });
   const owner = new Client({ connectionString: cluster.url });
   const admin = createDatabase({ DATABASE_URL: cluster.url });
@@ -103,6 +103,7 @@ test("existing six-migration database reproduces production failures; reviewed m
       data: { lastSequence: 1 },
     });
     const historical = await admin.directMessage.create({
+      select: { id: true }, // Only fields present in this deliberately old schema.
       data: {
         conversationId: conversation.id,
         senderId: a.user.id,
@@ -166,6 +167,11 @@ test("existing six-migration database reproduces production failures; reviewed m
     );
     await owner.query(setup);
     await owner.query(setup); // The release's runtime setup is safely repeatable.
+    for (const name of directories.filter((name) => name > upgrade)) {
+      await owner.query(
+        await readFile(new URL(`${name}/migration.sql`, migrations), "utf8"),
+      );
+    }
     assert.deepEqual(await checkRuntimeDatabase(runtime), {
       ready: true,
       missingGroupSchema: false,

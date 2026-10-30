@@ -1,4 +1,167 @@
 /* Final responsive and theme pass, shared by production and visual QA. */
+.app-shell:has(.calendar-workspace) .shell-workspace,
+.calendar-workspace {
+  scrollbar-width: none;
+  overflow-x: hidden;
+}
+.app-shell:has(.calendar-workspace) .shell-workspace::-webkit-scrollbar,
+.calendar-workspace::-webkit-scrollbar {
+  display: none;
+}
+.calendar-workspace {
+  width: 100%;
+  min-width: 0;
+  max-width: 1120px;
+  padding: 20px clamp(12px, 3vw, 32px);
+}
+.calendar-workspace .feature-page-heading {
+  margin-bottom: 16px;
+}
+.calendar-workspace .calendar-day {
+  min-height: 0;
+  height: clamp(36px, calc((100svh - 480px) / 6), 70px);
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  gap: 3px;
+}
+.calendar-workspace .calendar-day > span:first-child {
+  align-self: center;
+}
+.calendar-workspace .calendar-day-events {
+  display: none;
+}
+.calendar-workspace .calendar-weekday {
+  text-align: center;
+  padding: 8px 4px;
+}
+.calendar-workspace .calendar-dot {
+  display: block;
+  flex-shrink: 0;
+}
+.calendar-workspace .calendar-filters > * {
+  min-width: 0;
+}
+.people-picker {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.people-picker legend {
+  padding-inline: 4px;
+}
+.selected-people {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.selected-people li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+@media (max-width: 767px) {
+  .app-shell :is(.calendar-workspace, .profile-workspace, .settings-workspace, .search-workspace, .friends-list, .direct-list-scroll, .context-panel, .active-panel) {
+    padding-bottom: var(--floating-navigation-space, 136px);
+    scroll-padding-bottom: var(--floating-navigation-space, 136px);
+  }
+  .calendar-workspace {
+    padding: 10px 12px var(--floating-navigation-space, 136px);
+  }
+  .calendar-workspace .feature-page-heading {
+    align-items: center;
+    min-height: 44px;
+    margin-bottom: 8px;
+  }
+  .calendar-workspace .feature-page-heading .eyebrow,
+  .calendar-workspace .feature-page-heading .supporting-copy {
+    display: none;
+  }
+  .calendar-workspace .feature-page-heading h1 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  .calendar-workspace .feature-page-heading .button {
+    min-height: 40px;
+    white-space: nowrap;
+  }
+  .calendar-workspace .calendar-toolbar {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .calendar-workspace .calendar-toolbar > .feature-actions {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px auto;
+    width: 100%;
+    gap: 2px;
+  }
+  .calendar-workspace .calendar-toolbar h2 {
+    min-width: 0;
+    text-align: center;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .calendar-workspace .calendar-toolbar .button {
+    padding-inline: 8px;
+    font-size: 0.75rem;
+  }
+  .calendar-workspace .segmented {
+    width: 100%;
+    min-width: 0;
+  }
+  .calendar-workspace .segmented button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 3px;
+    font-size: 0.75rem;
+  }
+  .calendar-workspace .calendar-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 108px;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .calendar-workspace .calendar-filters select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .calendar-workspace .calendar-filters .search-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .calendar-workspace .calendar-filters input {
+    min-width: 0;
+    width: 100%;
+  }
+  .calendar-workspace .calendar-day {
+    height: clamp(32px, calc((100svh - 450px) / 6), 52px);
+    padding: 3px;
+    gap: 2px;
+  }
+  .calendar-workspace .calendar-weekday {
+    padding: 6px 0;
+  }
+  .calendar-workspace .calendar-agenda {
+    margin-top: 16px;
+  }
+  .calendar-workspace .feature-dialog {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0 auto;
+    max-height: 85dvh;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+}
 .notification-trigger {
   position: relative;
   width: 44px;

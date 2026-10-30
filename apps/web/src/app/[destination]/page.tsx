@@ -23,7 +23,7 @@ export default async function DestinationPage({
   const account = await requireAccount();
   return (
     <AppShell
-      key={destination.id}
+      key={`${destination.id}:${account.id}`}
       destination={destination}
       accountControls={
         destination.id === "profile" || destination.id === "settings" ? (

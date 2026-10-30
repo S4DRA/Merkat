@@ -62,6 +62,10 @@ type ThreadPosition = {
   draft: string;
   pending: Pending[];
 };
+export type DirectMemory = {
+  threads: Map<string, Thread>;
+  positions: Map<string, ThreadPosition>;
+};
 const time = (date: string) =>
   new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 const stamp = (date: string) =>
@@ -72,7 +76,21 @@ const stamp = (date: string) =>
     minute: "2-digit",
   });
 
-export function ChatsWorkspace({ userId }: { userId: string }) {
+export function ChatsWorkspace({
+  userId,
+  initialMemory,
+  remember,
+}: {
+  userId: string;
+  initialMemory?: DirectMemory;
+  remember?:
+    | ((
+        id: string,
+        thread: Thread | undefined,
+        position: ThreadPosition,
+      ) => void)
+    | undefined;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const selected = params.get("conversation") ?? "";
@@ -83,9 +101,11 @@ export function ChatsWorkspace({ userId }: { userId: string }) {
   const newChat = localNewChat || params.get("new") === "1";
   const [attempt, setAttempt] = useState(0);
   const [groupRevision, setGroupRevision] = useState(0);
-  const [threads, setThreads] = useState(new Map<string, Thread>());
-  const [positions, setPositions] = useState(new Map<string, ThreadPosition>());
-  const cache = useRef(new Map<string, Thread>());
+  const [threads, setThreads] = useState(() => new Map(initialMemory?.threads));
+  const [positions, setPositions] = useState(
+    () => new Map(initialMemory?.positions),
+  );
+  const cache = useRef(new Map(initialMemory?.threads));
   const busy = useRef(false);
   const queued = useRef(false);
   const selectedRef = useRef(selected);
@@ -227,9 +247,13 @@ export function ChatsWorkspace({ userId }: { userId: string }) {
     cache.current.set(id, thread);
     setThreads(new Map(cache.current));
   }, []);
-  const savePosition = useCallback((id: string, position: ThreadPosition) => {
-    setPositions((old) => new Map(old).set(id, position));
-  }, []);
+  const savePosition = useCallback(
+    (id: string, position: ThreadPosition) => {
+      setPositions((old) => new Map(old).set(id, position));
+      remember?.(id, cache.current.get(id), position);
+    },
+    [remember],
+  );
   const selectedThread = threads.get(selected);
   function closeNewChat() {
     setNewChat(false);

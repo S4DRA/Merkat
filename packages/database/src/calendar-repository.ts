@@ -33,6 +33,10 @@ const boundedRange = z
   .object({
     start: z.iso.datetime({ offset: true }),
     end: z.iso.datetime({ offset: true }),
+    after: z
+      .object({ startsAt: z.iso.datetime({ offset: true }), id: z.uuid() })
+      .strict()
+      .optional(),
   })
   .strict()
   .refine(
@@ -213,6 +217,22 @@ export function createCalendarRepository(
             participants: { some: { userId, subscribed: true } },
             startsAt: { lt: new Date(range.end) },
             endsAt: { gte: new Date(range.start) },
+            ...(range.after
+              ? {
+                  OR: [
+                    {
+                      startsAt: {
+                        gt: new Date(range.after.startsAt),
+                        lt: new Date(range.end),
+                      },
+                    },
+                    {
+                      startsAt: new Date(range.after.startsAt),
+                      id: { gt: range.after.id },
+                    },
+                  ],
+                }
+              : {}),
           },
           include,
           orderBy: [{ startsAt: "asc" }, { id: "asc" }],
@@ -228,7 +248,15 @@ export function createCalendarRepository(
             throw error;
           }
         }
-        return { events, truncated: rows.length > 200 };
+        const last = rows[199];
+        return {
+          events,
+          truncated: rows.length > 200,
+          nextCursor:
+            rows.length > 200 && last
+              ? { startsAt: last.startsAt.toISOString(), id: last.id }
+              : null,
+        };
       });
     },
     conversation(hash: string, raw: unknown) {

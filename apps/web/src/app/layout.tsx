@@ -6,8 +6,10 @@ import "./social-navigation.css";
 import "./groups.css";
 import "./production.css";
 import "./refinements.css";
+import "./quick-create.css";
 import { InstallAppProvider } from "../components/install-app";
 import { AppearanceProvider } from "../components/appearance";
+import { PwaRuntime } from "../components/pwa-runtime";
 
 export const metadata: Metadata = {
   title: "Merkat — Talk. Plan. Meet.",
@@ -47,7 +49,7 @@ export default function RootLayout({
       </head>
       <body>
         <AppearanceProvider>
-          <InstallAppProvider>{children}</InstallAppProvider>
+          <InstallAppProvider>{children}<PwaRuntime /></InstallAppProvider>
         </AppearanceProvider>
       </body>
     </html>

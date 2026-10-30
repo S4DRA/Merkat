@@ -28,10 +28,16 @@ import {
 } from "@merkat/contracts";
 import { Button, IconButton } from "../ui/primitives";
 import { directRequest, directError } from "../../lib/direct-client";
+import { PeoplePicker } from "../people-picker";
+import { GroupDestinationPicker } from "./group-destination-picker";
+import {
+  dateKey,
+  monthDays,
+  eventsForDay,
+  weekStartsOn,
+} from "../../lib/calendar-view";
 export const featureChanged = () =>
   window.dispatchEvent(new Event("merkat:feature-change"));
-const dateKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const eventDate = (event: CalendarEventView) =>
   new Date(event.startsAt).toLocaleString([], {
     weekday: "short",
@@ -82,11 +88,15 @@ function exportCalendar(event: CalendarEventView) {
 export function EventForm({
   scope,
   event,
+  initialDate,
+  onDirtyChange,
   onSaved,
   onCancel,
 }: {
   scope?: ChatScope | undefined;
   event?: CalendarEventView | undefined;
+  initialDate?: string | undefined;
+  onDirtyChange?: ((dirty: boolean) => void) | undefined;
   onSaved: (event: CalendarEventView) => void;
   onCancel: () => void;
 }) {
@@ -94,11 +104,28 @@ export function EventForm({
     busy = useRef(false);
   const [error, setError] = useState(""),
     [pending, setPending] = useState(false);
+  const [sharing, setSharing] = useState("personal");
+  const [invitees, setInvitees] = useState<string[]>([]);
+  const [groupScope, setGroupScope] = useState<ChatScope | undefined>();
+  const [dirty, setDirty] = useState(false);
+  const destination = scope ?? (sharing === "group" ? groupScope : undefined);
+  useEffect(() => {
+    if (!dirty) return;
+    const leaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", leaving);
+    return () => window.removeEventListener("beforeunload", leaving);
+  }, [dirty]);
   const zone =
     event?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [timezone, setTimezone] = useState(zone);
   const [initial] = useState(() => {
-    const date = new Date(Date.now() + 3600000);
+    const date =
+      initialDate && initialDate !== dateKey(new Date())
+        ? new Date(`${initialDate}T10:00:00`)
+        : new Date(Date.now() + 3600000);
     date.setMinutes(0, 0, 0);
     return date;
   });
@@ -108,26 +135,32 @@ export function EventForm({
     const form = new FormData(e.currentTarget);
     setError("");
     try {
+      if (!scope && sharing === "group" && !groupScope)
+        throw new Error("Choose a group to share with.");
       const usernames = [
-        ...new Set(
-          String(form.get("invitees") ?? "")
+        ...new Set([
+          ...invitees,
+          ...String(form.get("invitees") ?? "")
             .split(/[\s,]+/)
             .map((name) => name.trim().replace(/^@/, "").toLowerCase())
             .filter(Boolean),
-        ),
+        ]),
       ];
       if (
         usernames.length > 30 ||
         usernames.some((name) => !/^[a-z][a-z0-9_]{2,29}$/.test(name))
       )
         throw new Error("Enter up to 30 valid usernames, separated by commas.");
+      const start = zonedDateTimeToIso(String(form.get("start")), timezone);
       const value = calendarFieldsSchema.parse({
         title: form.get("title"),
         description: form.get("description"),
         location: form.get("location"),
         timezone,
-        startsAt: zonedDateTimeToIso(String(form.get("start")), timezone),
-        endsAt: zonedDateTimeToIso(String(form.get("end")), timezone),
+        startsAt: start,
+        endsAt: form.get("end")
+          ? zonedDateTimeToIso(String(form.get("end")), timezone)
+          : new Date(Date.parse(start) + 3600000).toISOString(),
       });
       busy.current = true;
       setPending(true);
@@ -138,11 +171,15 @@ export function EventForm({
           : {
               clientId: clientId.current,
               event: value,
-              ...(!scope ? { usernames } : {}),
-              ...(scope ? { scope } : {}),
+              ...(!destination
+                ? { usernames: sharing === "people" ? usernames : [] }
+                : {}),
+              ...(destination ? { scope: destination } : {}),
             },
       );
       featureChanged();
+      setDirty(false);
+      onDirtyChange?.(false);
       onSaved(result.event);
     } catch (error) {
       setError(
@@ -156,7 +193,15 @@ export function EventForm({
     }
   }
   return (
-    <form className="social-form event-form" onSubmit={(e) => void submit(e)}>
+    <form
+      className="social-form event-form"
+      data-dirty={dirty}
+      onChange={() => {
+        setDirty(true);
+        onDirtyChange?.(true);
+      }}
+      onSubmit={(e) => void submit(e)}
+    >
       <h2>{event ? "Edit plan" : "Make a plan"}</h2>
       <p className="supporting-copy">
         {scope
@@ -188,11 +233,10 @@ export function EventForm({
           />
         </label>
         <label>
-          Ends
+          Ends (optional; defaults to one hour)
           <input
             name="end"
             type="datetime-local"
-            required
             defaultValue={localDateTimeInput(
               event?.endsAt ??
                 new Date(initial.getTime() + 3600000).toISOString(),
@@ -240,22 +284,52 @@ export function EventForm({
         />
       </label>
       {!event && !scope && (
-        <label>
-          Invite people (optional)
-          <input
-            name="invitees"
-            maxLength={960}
-            placeholder="username, another_username"
-            autoCapitalize="none"
-            autoCorrect="off"
-            aria-describedby="event-invite-help"
-          />
-          <small id="event-invite-help" className="supporting-copy">
-            Enter usernames separated by commas. Each person chooses whether to
-            join and add the plan to their calendar.
-          </small>
-        </label>
+        <>
+          <label>
+            Activity visibility
+            <select
+              value={sharing}
+              onChange={(e) => {
+                setSharing(e.target.value);
+                setGroupScope(undefined);
+              }}
+            >
+              <option value="personal">Personal activity</option>
+              <option value="people">Invite people</option>
+              <option value="group">Share with a group</option>
+            </select>
+          </label>
+          {sharing === "people" && (
+            <>
+              <PeoplePicker
+                value={invitees}
+                onChange={setInvitees}
+                disabled={pending}
+              />
+              <details>
+                <summary>Enter usernames directly</summary>
+                <label>
+                  Invite people (optional)
+                  <input
+                    name="invitees"
+                    maxLength={960}
+                    placeholder="username, another_username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                  />
+                </label>
+              </details>
+            </>
+          )}
+          {sharing === "group" && (
+            <GroupDestinationPicker onChange={setGroupScope} />
+          )}
+        </>
       )}
+      <small>
+        Going adds the activity to your calendar. Reminders use your settings:
+        24 hours and 5 hours before.
+      </small>
       {error && (
         <p role="alert" className="account-error">
           {error}
@@ -516,30 +590,119 @@ function CalendarContent({ userId }: { userId: string }) {
   const [events, setEvents] = useState<CalendarEventView[]>([]),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
-    [truncated, setTruncated] = useState(false),
     [opened, setOpened] = useState<string | null>(null),
     [creating, setCreating] = useState(false);
+  const [today, setToday] = useState(() => dateKey(new Date()));
+  const [creationDate, setCreationDate] = useState(selected);
+  const [firstDay] = useState(() => weekStartsOn(navigator.language));
+  const request = useRef<AbortController | null>(null);
+  const dirty = useRef(false);
+  const markDirty = useCallback((value: boolean) => {
+    dirty.current = value;
+  }, []);
+  const selectedDate = new Date(`${selected}T12:00:00`);
+  const weekStart = new Date(selectedDate);
+  weekStart.setDate(
+    weekStart.getDate() - ((weekStart.getDay() - firstDay + 7) % 7),
+  );
+  const days = monthDays(anchor, firstDay);
   const year = anchor.getFullYear(),
     month = anchor.getMonth();
+  const start = (
+    mode === "day"
+      ? new Date(`${selected}T00:00:00`)
+      : mode === "week"
+        ? new Date(
+            weekStart.getFullYear(),
+            weekStart.getMonth(),
+            weekStart.getDate(),
+          )
+        : mode === "agenda"
+          ? new Date(year, month, 1)
+          : days[0]!
+  ).toISOString();
+  const rangeEnd = (
+    mode === "day"
+      ? new Date(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth(),
+          selectedDate.getDate() + 1,
+        )
+      : mode === "week"
+        ? new Date(
+            weekStart.getFullYear(),
+            weekStart.getMonth(),
+            weekStart.getDate() + 7,
+          )
+        : mode === "agenda"
+          ? new Date(year, month + 3, 1)
+          : new Date(
+              days[41]!.getFullYear(),
+              days[41]!.getMonth(),
+              days[41]!.getDate() + 1,
+            )
+  ).toISOString();
   const load = useCallback(async () => {
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
     setLoading(true);
     try {
-      const result = await directRequest<{
-        events: CalendarEventView[];
-        truncated: boolean;
-      }>("calendar/list", {
-        start: new Date(year, month - 1, 1).toISOString(),
-        end: new Date(year, month + 2, 1).toISOString(),
-      });
-      setEvents(result.events);
-      setTruncated(result.truncated);
+      const all = new Map<string, CalendarEventView>();
+      let after: { startsAt: string; id: string } | null = null;
+      do {
+        const previous = after;
+        const result: {
+          events: CalendarEventView[];
+          nextCursor?: { startsAt: string; id: string } | null;
+        } = await directRequest(
+          "calendar/list",
+          { start, end: rangeEnd, ...(after ? { after } : {}) },
+          controller.signal,
+        );
+        result.events.forEach((event) => all.set(event.id, event));
+        after = result.nextCursor ?? null;
+        if (
+          after &&
+          previous &&
+          after.id === previous.id &&
+          after.startsAt === previous.startsAt
+        )
+          throw new Error("Calendar pagination did not advance");
+      } while (after);
+      if (controller.signal.aborted) return;
+      setEvents([...all.values()]);
       setError("");
     } catch (error) {
-      setError(directError(error));
+      if (!controller.signal.aborted) setError(directError(error));
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
-  }, [year, month]);
+  }, [start, rangeEnd]);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const update = () => {
+      const now = new Date();
+      setToday(dateKey(now));
+      clearTimeout(timer);
+      timer = setTimeout(
+        update,
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + 1,
+        ).getTime() -
+          now.getTime() +
+          25,
+      );
+    };
+    timer = setTimeout(update, 0);
+    window.addEventListener("focus", update);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("focus", update);
+    };
+  }, []);
   useEffect(() => {
     let active = true;
     queueMicrotask(() => {
@@ -548,20 +711,34 @@ function CalendarContent({ userId }: { userId: string }) {
     const change = () => void load();
     window.addEventListener("merkat:feature-change", change);
     window.addEventListener("focus", change);
+    window.addEventListener("online", change);
+    window.addEventListener("merkat:reconcile", change);
     return () => {
       active = false;
+      request.current?.abort();
       window.removeEventListener("merkat:feature-change", change);
       window.removeEventListener("focus", change);
+      window.removeEventListener("online", change);
+      window.removeEventListener("merkat:reconcile", change);
     };
   }, [load]);
   useEffect(() => {
     const id = params.get("event");
     if (id) {
-      queueMicrotask(() => setOpened(id));
+      queueMicrotask(() => {
+        setOpened(id);
+        setCreating(false);
+      });
       dialog.current?.showModal();
     }
   }, [params]);
   function open(id: string) {
+    if (
+      dirty.current &&
+      !window.confirm("Discard the unfinished activity form?")
+    )
+      return;
+    dirty.current = false;
     setOpened(id);
     setCreating(false);
     dialog.current?.showModal();
@@ -574,48 +751,44 @@ function CalendarContent({ userId }: { userId: string }) {
         .toLowerCase()
         .includes(search.toLowerCase()),
   );
-  const first = new Date(year, month, 1),
-    offset = (first.getDay() + 6) % 7,
-    days = Array.from(
-      { length: 42 },
-      (_, i) => new Date(year, month, 1 - offset + i),
-    );
-  const selectedDate = new Date(`${selected}T12:00:00`),
-    weekStart = new Date(selectedDate);
-  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
   function navigate(direction: number) {
     if (mode === "week" || mode === "day") {
       const next = new Date(selectedDate);
       next.setDate(next.getDate() + direction * (mode === "week" ? 7 : 1));
       setSelected(dateKey(next));
       setAnchor(next);
-    } else setAnchor(new Date(year, month + direction, 1));
+    } else {
+      const next = new Date(year, month + direction, 1);
+      setAnchor(next);
+      setSelected(dateKey(next));
+    }
   }
   const agenda = visible.filter((e) =>
     mode === "agenda"
       ? new Date(e.endsAt) >= new Date()
       : mode === "week"
-        ? new Date(e.startsAt) >= weekStart &&
+        ? new Date(e.endsAt) > weekStart &&
           new Date(e.startsAt) <
             new Date(
               weekStart.getFullYear(),
               weekStart.getMonth(),
               weekStart.getDate() + 7,
             )
-        : dateKey(new Date(e.startsAt)) === selected,
+        : eventsForDay([e], selectedDate).length > 0,
   );
   return (
     <div className="calendar-workspace">
       <header className="feature-page-heading">
         <div>
           <p className="eyebrow">MAKE TIME FOR GOOD COMPANY</p>
-          <h1>Calendar</h1>
+          <h1 className="sr-only">Calendar</h1>
           <p className="supporting-copy">Your plans, all in one place.</p>
         </div>
         <div className="feature-actions">
           <Button
             variant="primary"
             onClick={() => {
+              if (!dirty.current) setCreationDate(selected);
               setCreating(true);
               setOpened(null);
               dialog.current?.showModal();
@@ -694,23 +867,16 @@ function CalendarContent({ userId }: { userId: string }) {
           <Button onClick={() => void load()}>Try again</Button>
         </div>
       )}
-      {truncated && (
-        <p role="status">
-          Showing the first 200 plans. Narrow the date range or search.
-        </p>
-      )}
       {mode === "month" && (
         <div className="calendar-grid" aria-label="Month calendar">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-            <div className="calendar-weekday" key={day}>
-              {day}
+          {days.slice(0, 7).map((day) => (
+            <div className="calendar-weekday" key={dateKey(day)}>
+              {day.toLocaleDateString([], { weekday: "short" })}
             </div>
           ))}
           {days.map((date) => {
             const key = dateKey(date),
-              matches = visible.filter(
-                (e) => dateKey(new Date(e.startsAt)) === key,
-              );
+              matches = eventsForDay(events, date);
             return (
               <button
                 key={key}
@@ -718,9 +884,21 @@ function CalendarContent({ userId }: { userId: string }) {
                 className="calendar-day"
                 data-outside={date.getMonth() !== month}
                 data-selected={key === selected}
-                aria-current={key === dateKey(new Date()) ? "date" : undefined}
+                aria-current={key === today ? "date" : undefined}
+                aria-pressed={key === selected}
                 aria-label={`${date.toLocaleDateString([], { dateStyle: "full" })}, ${matches.length} plans`}
-                onClick={() => setSelected(key)}
+                onClick={() => {
+                  if (
+                    dirty.current &&
+                    !window.confirm("Discard the unfinished activity form?")
+                  )
+                    return;
+                  dirty.current = false;
+                  setSelected(key);
+                  setCreating(false);
+                  setOpened(null);
+                  dialog.current?.showModal();
+                }}
               >
                 <span>{date.getDate()}</span>
                 <span className="calendar-day-events">
@@ -749,7 +927,7 @@ function CalendarContent({ userId }: { userId: string }) {
               ? "This week’s plans"
               : "Coming up"}
         </h2>
-        {!loading && !agenda.length && (
+        {!loading && !error && !agenda.length && (
           <div className="feature-empty">
             <CalendarDays size={32} />
             <h3>A little room for something good.</h3>
@@ -787,7 +965,16 @@ function CalendarContent({ userId }: { userId: string }) {
       <dialog
         ref={dialog}
         className="feature-dialog"
-        aria-label={creating ? "Create a plan" : "Plan details"}
+        aria-label={
+          creating
+            ? "Create a plan"
+            : opened
+              ? "Plan details"
+              : "Day activities"
+        }
+        onClick={(event) => {
+          if (event.target === event.currentTarget) dialog.current?.close();
+        }}
       >
         <div className="direct-dialog-heading">
           <span>MERKAT CALENDAR</span>
@@ -799,7 +986,11 @@ function CalendarContent({ userId }: { userId: string }) {
         </div>
         {creating ? (
           <EventForm
+            key={creationDate}
+            initialDate={creationDate}
+            onDirtyChange={markDirty}
             onSaved={(e) => {
+              dirty.current = false;
               setOpened(e.id);
               setCreating(false);
               void load();
@@ -808,11 +999,56 @@ function CalendarContent({ userId }: { userId: string }) {
           />
         ) : opened ? (
           <EventDetail
+            key={opened}
             eventId={opened}
             userId={userId}
             onChanged={() => void load()}
           />
-        ) : null}
+        ) : (
+          <section className="day-activities">
+            <h2>
+              {selectedDate.toLocaleDateString([], { dateStyle: "full" })}
+            </h2>
+            {selected === today && <p className="feature-status">Today</p>}
+            {loading && <p role="status">Loading activities…</p>}
+            {error && <p role="alert">{error}</p>}
+            {!loading &&
+              !error &&
+              eventsForDay(events, selectedDate).length === 0 && (
+                <p>No activities for this day.</p>
+              )}
+            {eventsForDay(events, selectedDate).map((event) => (
+              <button
+                type="button"
+                className="agenda-event"
+                key={event.id}
+                onClick={() => open(event.id)}
+              >
+                <span>
+                  <strong>{event.title}</strong>
+                  <small>{eventDate(event)}</small>
+                  <small>
+                    {event.participants.length} participants ·{" "}
+                    {event.participants
+                      .find((person) => person.userId === userId)
+                      ?.response.toLowerCase()}
+                  </small>
+                </span>
+                <span>View details</span>
+              </button>
+            ))}
+            <Button
+              variant="primary"
+              onClick={() => {
+                setCreationDate(selected);
+                setCreating(true);
+                setOpened(null);
+              }}
+            >
+              Create Activity
+            </Button>
+          </section>
+        )}
       </dialog>
     </div>
   );
