@@ -119,6 +119,7 @@ export type GroupChannelView = {
   deliveredSequence: number;
 };
 export type GroupSummary = {
+  avatarRef?: string | null;
   id: string;
   name: string;
   description: string;

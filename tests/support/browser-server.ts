@@ -21,6 +21,9 @@ const accounts = new AccountService(createAccountRepository(database));
 const origin = "https://127.0.0.1:3100";
 const authSecret = randomBytes(32).toString("hex");
 await mkdir("artifacts", { recursive: true });
+await writeFile("artifacts/browser-database.json", JSON.stringify({
+  owner: "merkat-isolated-browser-test-v1", url: postgres.url,
+}));
 for (const fixture of ["authenticated", "onboarding", "rotation"]) {
   const onboarded = fixture !== "onboarding";
   // Trusted test fixture only. No application imports this file or exposes a login bypass.

@@ -38,8 +38,9 @@ for (const width of [320, 360, 390, 430]) {
       ).toBeVisible();
       await page
         .getByRole("navigation")
-        .getByRole("link", { name: "New chat", exact: true })
+        .getByRole("button", { name: "Create a chat or group", exact: true })
         .click();
+      await page.getByRole("menuitem", { name: "New Chat", exact: true }).click();
       await page.getByLabel("Username", { exact: true }).fill("DM_SECOND_TEST");
       await page.getByRole("button", { name: "Find", exact: true }).click();
       await expect(
@@ -161,8 +162,8 @@ for (const width of [320, 360, 390, 430]) {
       ).toBeVisible();
       const logo = page
         .getByRole("navigation")
-        .getByRole("link", { name: "New chat", exact: true });
-      await expect(logo).toHaveAttribute("href", "/chats?new=1");
+        .getByRole("button", { name: "Create a chat or group", exact: true });
+      await expect(logo).toHaveAttribute("aria-haspopup", "menu");
       await expect(logo.locator("img")).toHaveAttribute(
         "src",
         "/brand/merkat-white-transparent.png",

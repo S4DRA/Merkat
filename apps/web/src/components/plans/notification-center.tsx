@@ -4,6 +4,10 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { Bell, CheckCheck, X } from "lucide-react";
 import { Button, IconButton, Badge } from "../ui/primitives";
 import { directRequest, directError } from "../../lib/direct-client";
+import { useDirectRealtime } from "../chats/use-direct-realtime";
+import { DirectRequestError } from "../../lib/direct-client";
+import { useRouter } from "next/navigation";
+const onInvalidation = () => {};
 type Notice = {
   id: string;
   title: string;
@@ -13,6 +17,20 @@ type Notice = {
   readAt: string | null;
 };
 export function NotificationCenter() {
+  const router = useRouter();
+  const unauthorized = useCallback(
+    (error: unknown) => {
+      if (
+        error instanceof DirectRequestError &&
+        error.code === "UNAUTHORIZED"
+      ) {
+        router.replace("/login");
+        router.refresh();
+      }
+    },
+    [router],
+  );
+  useDirectRealtime(onInvalidation, unauthorized, 0);
   const dialog = useRef<HTMLDialogElement>(null);
   const fetching = useRef(false),
     queued = useRef(false);

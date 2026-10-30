@@ -7,6 +7,7 @@ export { createAuthenticationLimiter } from "./authentication-limiter.js";
 export { createMessagingRepository } from "./messaging-repository.js";
 export { createFriendshipRepository } from "./friendship-repository.js";
 export { createGroupRepository } from "./group-repository.js";
+export { createGroupAvatarRepository } from "./group-avatar-repository.js";
 export { createPrivacyRepository } from "./privacy-repository.js";
 export { checkRuntimeDatabase } from "./runtime-readiness.js";
 export { createProfileRepository } from "./profile-repository.js";

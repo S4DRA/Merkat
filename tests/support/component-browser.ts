@@ -470,7 +470,7 @@ try {
   await page.getByRole("button", { name: "Make a plan", exact: true }).click();
   await page.getByLabel(/What.s the plan/).fill("Browser-tested plan");
   await page.getByLabel("Starts", { exact: true }).fill("2026-11-10T20:30");
-  await page.getByLabel("Ends", { exact: true }).fill("2026-11-10T22:30");
+  await page.getByLabel(/^Ends/).fill("2026-11-10T22:30");
   await page.getByRole("button", { name: "Create plan", exact: true }).click();
   await page
     .getByRole("heading", { name: "Browser-tested plan", exact: true })
@@ -508,10 +508,12 @@ try {
   checks++;
   await page.goto("https://merkat.test/plans");
   await page.getByRole("button", { name: "New plan", exact: true }).click();
+  await page.getByLabel("Activity visibility").selectOption("people");
+  await page.getByText("Enter usernames directly", { exact: true }).click();
   await page.getByLabel("Invite people (optional)").fill("@qa_bob, qa_casey");
   await page.getByLabel(/What.s the plan/).fill("Invited from calendar");
   await page.getByLabel("Starts", { exact: true }).fill("2026-11-12T20:00");
-  await page.getByLabel("Ends", { exact: true }).fill("2026-11-12T21:00");
+  await page.getByLabel(/^Ends/).fill("2026-11-12T21:00");
   await page.getByRole("button", { name: "Create plan", exact: true }).click();
   await page
     .getByRole("heading", { name: "Invited from calendar", exact: true })

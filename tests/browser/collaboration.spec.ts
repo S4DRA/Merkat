@@ -187,8 +187,10 @@ test("three authenticated users persist messages, calendar RSVP and a consented 
     expect(reloaded.tab.closedAt).not.toBeNull();
     expect(reloaded.tab.state.snapshot?.total).toBe(10001);
     await third.goto(`/chats?group=${group.id}&channel=${channelId}`);
+    await third.getByRole("button", { name: /^THE TAB Real HTTP tab / }).click();
     await expect(
-      third.getByText("Real HTTP tab", { exact: true }),
+      third.getByRole("dialog", { name: "Tab details", exact: true })
+        .getByRole("heading", { name: "Real HTTP tab", exact: true }),
     ).toBeVisible();
     await post(owner, "calendar/cancel", {
       id: event.id,

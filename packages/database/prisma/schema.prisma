@@ -277,6 +277,7 @@ enum InvitationPolicy {
 }
 
 model ChatGroup {
+  avatar      GroupAvatar?
   id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ownerId     String            @db.Uuid
   owner       User              @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
@@ -298,6 +299,14 @@ model ChatGroup {
   @@unique([createdById, clientId])
   @@index([ownerId])
   @@index([activityAt(sort: Desc), id(sort: Desc)])
+}
+
+model GroupAvatar {
+  groupId   String    @id @db.Uuid
+  group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  bytes     Bytes
+  version   String    @db.Char(64)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
 }
 
 model GroupMember {

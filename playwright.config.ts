@@ -19,6 +19,10 @@ export default defineConfig({
   use: {
     baseURL: localOrigin || "https://127.0.0.1:3100",
     ignoreHTTPSErrors: true,
+    // The isolated HTTPS ingress has a committed test certificate. Context-only
+    // ignoreHTTPSErrors does not cover Chromium service-worker registration.
+    // Every origin supported by this configuration is restricted to loopback.
+    launchOptions: { args: ["--ignore-certificate-errors"] },
     browserName: "chromium",
     ...(process.env.PLAYWRIGHT_CHANNEL
       ? { channel: process.env.PLAYWRIGHT_CHANNEL }

@@ -29,6 +29,7 @@ export function QuickCreate() {
   const [anchor, setAnchor] = useState({ x: 0, y: 0 });
   const reset = useCallback((focus = false) => {
     clearTimeout(timer.current);
+    if (gesture.current) suppressClick.current = true;
     gesture.current = null;
     setOpen(false);
     setPressed(false);

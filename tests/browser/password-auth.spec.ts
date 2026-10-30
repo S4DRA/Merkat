@@ -84,7 +84,9 @@ for (const width of [320, 360, 390, 430]) {
     await expect(page).toHaveURL(/\/chats$/);
     const nav = page.getByRole("navigation", { name: "Main navigation" });
     await expect(
-      nav.getByRole("link", { name: "New chat", exact: true }).locator("img"),
+      nav
+        .getByRole("button", { name: "Create a chat or group", exact: true })
+        .locator("img"),
     ).toHaveAttribute("src", "/brand/merkat-white-transparent.png");
     await nav.getByRole("link", { name: "Profile", exact: true }).click();
     await expect(page.getByText(`@${name}`, { exact: true })).toBeVisible();

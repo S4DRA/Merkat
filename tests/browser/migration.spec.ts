@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-test("approved white transparent logo opens New chat in the new navigation order", async ({
+test("approved logo exposes creation actions in the preserved navigation order", async ({
   page,
 }) => {
   const asset = readFileSync(
@@ -14,7 +14,7 @@ test("approved white transparent logo opens New chat in the new navigation order
   await page.goto("/chats");
   const links = page
     .getByRole("navigation", { name: "Main navigation" })
-    .getByRole("link");
+    .locator(".destination");
   await expect(links).toHaveText([
     "Calendar",
     "Friends",
@@ -23,7 +23,7 @@ test("approved white transparent logo opens New chat in the new navigation order
     "Profile",
   ]);
   const middle = links.nth(2);
-  await expect(middle).toHaveAttribute("href", "/chats?new=1");
+  await expect(middle).toHaveAttribute("aria-haspopup", "menu");
   const logo = middle.locator("img");
   await expect(logo).toHaveAttribute(
     "src",
@@ -42,6 +42,10 @@ test("approved white transparent logo opens New chat in the new navigation order
   expect(
     await middle.evaluate((element) => getComputedStyle(element).outlineStyle),
   ).not.toBe("none");
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("menuitem", { name: "New Chat", exact: true }),
+  ).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/chats\?new=1$/);
   await expect(page.getByRole("dialog", { name: "New chat" })).toBeVisible();

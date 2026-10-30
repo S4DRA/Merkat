@@ -50,4 +50,16 @@ WITH CHECK (
   AND payload - 'id' = '{}'::jsonb
   AND topic ~ '^merkat:user:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 );
+-- Additive application features, including when the runtime role is created
+-- after their migrations. Never grant report reads or browser privileges.
+DO $$ DECLARE t text; BEGIN
+ FOREACH t IN ARRAY ARRAY['ProfileAvatar','UserSettings','TabSession','PlanReminder','Notification','RecoveryCode','PushSubscription','PushDelivery','GroupAvatar'] LOOP
+  IF to_regclass(format('public.%I',t)) IS NOT NULL THEN
+   EXECUTE format('GRANT SELECT,INSERT,UPDATE,DELETE ON public.%I TO merkat_runtime',t);
+   IF NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename=t AND policyname='merkat_runtime') THEN
+    EXECUTE format('CREATE POLICY merkat_runtime ON public.%I TO merkat_runtime USING(true) WITH CHECK(true)',t);
+   END IF;
+  END IF;
+ END LOOP;
+END $$;
 COMMIT;

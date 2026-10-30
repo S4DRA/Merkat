@@ -51,8 +51,8 @@ export async function checkRuntimeDatabase(db: PrismaClient) {
           THEN ARRAY['INSERT'] ELSE ARRAY['SELECT', 'INSERT', 'UPDATE', 'DELETE'] END) privilege
           WHERE c.oid IS NULL OR NOT has_table_privilege(c.oid, privilege)) AS "missingPrivileges",
         EXISTS (SELECT 1 FROM pg_policy p WHERE p.polrelid = c.oid
-          AND p.polname = CASE WHEN required->>'table' = 'SafetyReport'
-            THEN 'merkat_report_insert' ELSE 'merkat_server' END
+          AND p.polname = ANY(CASE WHEN required->>'table' = 'SafetyReport'
+            THEN ARRAY['merkat_report_insert'] ELSE ARRAY['merkat_server', 'merkat_runtime'] END)
           AND p.polcmd = CASE WHEN required->>'table' = 'SafetyReport' THEN 'a' ELSE '*' END
           AND EXISTS (SELECT 1 FROM unnest(p.polroles) policy_role
             WHERE policy_role = 0 OR pg_has_role(policy_role, 'USAGE'))) AS "runtimePolicy"

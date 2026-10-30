@@ -26,11 +26,11 @@ for (const width of [320, 360, 390, 430]) {
       await expect(nav.getByRole("link").nth(1)).toHaveAccessibleName(
         "Friends",
       );
-      await expect(nav.getByRole("link").nth(2)).toHaveAccessibleName(
-        "New chat",
-      );
-      await expect(nav.getByRole("link").nth(3)).toHaveAccessibleName("Chats");
-      await expect(nav.getByRole("link").nth(4)).toHaveAccessibleName(
+      await expect(
+        nav.getByRole("button", { name: "Create a chat or group" }),
+      ).toHaveAttribute("aria-haspopup", "menu");
+      await expect(nav.getByRole("link").nth(2)).toHaveAccessibleName("Chats");
+      await expect(nav.getByRole("link").nth(3)).toHaveAccessibleName(
         "Profile",
       );
       await page
@@ -87,7 +87,12 @@ for (const width of [320, 360, 390, 430]) {
       await expect(
         peer.getByRole("tabpanel").getByText("@dm_first_test"),
       ).toHaveCount(0);
-      await nav.getByRole("link", { name: "New chat", exact: true }).click();
+      await nav
+        .getByRole("button", { name: "Create a chat or group", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "New Chat", exact: true })
+        .click();
       await expect(
         page.getByRole("dialog", { name: "New chat", exact: true }),
       ).toBeVisible();

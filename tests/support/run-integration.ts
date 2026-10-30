@@ -22,6 +22,7 @@ try {
       "tests/integration/list-http-recovery.test.ts",
       "tests/integration/local-runtime.test.ts",
       "tests/integration/collaboration.test.ts",
+      "tests/integration/refinement.test.ts",
     ],
     {
       stdio: "inherit",

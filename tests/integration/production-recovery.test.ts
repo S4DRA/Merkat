@@ -155,7 +155,10 @@ test("existing six-migration database reproduces failures; reviewed migrations a
     );
     const noGrants = await checkRuntimeDatabase(runtime);
     assert.equal(noGrants.ready, false);
-    assert.equal(noGrants.missingGroupSchema, false);
+    // The seventh migration restores the original group schema, while later
+    // feature migrations still need to supply the current client's columns.
+    assert.equal(noGrants.issues.includes("Missing table: ChatGroup"), false);
+    assert.equal(noGrants.issues.includes("Missing table: UserBlock"), false);
     assert.ok(
       noGrants.issues.some((issue) =>
         issue.includes("Missing runtime privileges: ChatGroup"),
@@ -172,6 +175,12 @@ test("existing six-migration database reproduces failures; reviewed migrations a
         await readFile(new URL(`${name}/migration.sql`, migrations), "utf8"),
       );
     }
+    const runtimeSetup = await readFile(
+      new URL("../../infra/supabase/server-role.sql", import.meta.url),
+      "utf8",
+    );
+    await owner.query(runtimeSetup);
+    await owner.query(runtimeSetup);
     assert.deepEqual(await checkRuntimeDatabase(runtime), {
       ready: true,
       missingGroupSchema: false,

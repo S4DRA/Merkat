@@ -76,7 +76,7 @@ export function Avatar({
           alt=""
           fill
           sizes="44px"
-          unoptimized={src.startsWith("/api/avatars/")}
+          unoptimized={src.startsWith("/api/")}
         />
       ) : (
         <UserRound size={22} aria-hidden="true" />

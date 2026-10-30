@@ -14,26 +14,36 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
       name: "Main navigation",
     });
     await expect(navigation).toHaveCount(1);
-    await expect(navigation.getByRole("link")).toHaveCount(5);
+    await expect(navigation.getByRole("link")).toHaveCount(4);
+    await expect(
+      navigation.getByRole("button", { name: "Create a chat or group" }),
+    ).toHaveCount(1);
     await expect(navigation.locator(".badge")).toHaveCount(0);
     for (const [label, heading] of [
-      ["Calendar", "Plans"],
+      ["Calendar", "Calendar"],
       ["Friends", "Friends"],
       ["Profile", "Profile"],
       ["Chats", "Chats"],
     ] as const) {
       const link = navigation.getByRole("link", { name: label, exact: true });
       await link.click();
-      await expect(
-        page.getByRole("heading", { name: heading, exact: true }).first(),
-      ).toBeVisible();
+      if (label === "Calendar" || label === "Profile")
+        await expect(page.locator(".brand-header .brand-link")).toHaveText(
+          heading,
+        );
+      else
+        await expect(
+          page.getByRole("heading", { name: heading, exact: true }).first(),
+        ).toBeVisible();
+      if (label === "Calendar")
+        await expect(page.locator(".calendar-grid")).toBeVisible();
       await expect(link).toHaveAttribute("aria-current", "page");
       const rect = await link.boundingBox();
       expect(rect!.height).toBeGreaterThanOrEqual(44);
       expect(rect!.width).toBeGreaterThanOrEqual(44);
     }
     await expect(
-      page.getByRole("button", { name: "New chat", exact: true }).first(),
+      page.getByRole("navigation").getByRole("button", { name: "Create a chat or group", exact: true }),
     ).toBeVisible();
     await page.goto("/calls");
     const overview = page.getByRole("region", { name: "Calls overview" });
@@ -150,7 +160,7 @@ test("keyboard, dialog focus, secondary routes and reduced motion", async ({
 
 test("mobile information and landscape remain usable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 700 });
-  await page.goto("/plans");
+  await page.goto("/calls");
   await page.getByRole("button", { name: "Explore this space" }).click();
   await page
     .getByRole("button", { name: "About this space", exact: true })
@@ -160,9 +170,9 @@ test("mobile information and landscape remain usable", async ({ page }) => {
   await page.getByRole("button", { name: "Close information" }).click();
   await page.setViewportSize({ width: 767, height: 360 });
   await expect(
-    page.getByRole("button", { name: "Back to Plans" }),
+    page.getByRole("button", { name: "Back to Calls" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Back to Plans" }).click();
+  await page.getByRole("button", { name: "Back to Calls" }).click();
   await page.goto("/calls");
   await expect(
     page.getByRole("heading", { name: "Calls", exact: true }),

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, type FormEvent } from "react";
+import { GroupAvatarEditor } from "./group-avatar-editor";
 import type { GroupDetail, GroupMemberView } from "@merkat/contracts";
 import { Button } from "../ui/primitives";
 import { SocialDialog, ReportDialog } from "../privacy-controls";
@@ -165,6 +166,7 @@ export function GroupSettings({
   return (
     <SocialDialog title="Group settings" close={close} sheet>
       <div className="social-form">
+        {manager && <GroupAvatarEditor group={group} updated={updated} />}
         {manager ? (
           <form
             className="social-form"

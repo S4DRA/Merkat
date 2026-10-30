@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { GroupList } from "@merkat/contracts";
 import { Users, Plus } from "lucide-react";
-import { Badge, Button } from "../ui/primitives";
+import { Avatar, Badge, Button } from "../ui/primitives";
 import { directRequest, directError } from "../../lib/direct-client";
 export function GroupRows({
   list,
@@ -21,9 +21,13 @@ export function GroupRows({
           scroll={false}
           className="direct-list-item group-list-item"
         >
-          <span className="group-avatar">
-            <Users size={22} aria-hidden="true" />
-          </span>
+          {g.avatarRef ? (
+            <Avatar name={g.name} src={g.avatarRef} />
+          ) : (
+            <span className="group-avatar">
+              <Users size={22} aria-hidden="true" />
+            </span>
+          )}
           <span className="direct-list-copy">
             <span className="direct-list-line">
               <strong>{g.name}</strong>

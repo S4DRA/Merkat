@@ -2,7 +2,9 @@ import { test, expect, type Page, type Browser } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import type { GroupDetail, GroupList } from "@merkat/contracts";
 import { mockRealtime } from "../support/mock-realtime";
+import { resetFixtureRateLimits } from "../support/browser-fixtures";
 test.use({ storageState: "artifacts/dm-group_owner-state.json" });
+test.beforeEach(resetFixtureRateLimits);
 const origin = "https://127.0.0.1:3100";
 async function post<T>(
   page: Page,
@@ -134,6 +136,10 @@ for (const width of [320, 360, 390, 430]) {
         .click();
       const sheet = page.getByRole("dialog", { name: "Channels", exact: true });
       await expect(sheet).toBeVisible();
+      await expect.poll(async () => {
+        const box = (await sheet.boundingBox())!;
+        return box.y + box.height;
+      }).toBeLessThanOrEqual(845);
       const bounds = await sheet.boundingBox();
       expect(bounds!.x).toBeGreaterThanOrEqual(0);
       expect(bounds!.width).toBeLessThanOrEqual(width);
@@ -411,8 +417,9 @@ test("group creation and invitation acceptance work through the approved New cha
     await page.goto("/chats");
     await page
       .getByRole("navigation", { name: "Main navigation" })
-      .getByRole("link", { name: "New chat", exact: true })
+      .getByRole("button", { name: "Create a chat or group", exact: true })
       .click();
+    await page.getByRole("menuitem", { name: "New Chat", exact: true }).click();
     await page
       .getByRole("dialog")
       .getByRole("link", { name: "Create group", exact: true })
@@ -426,6 +433,12 @@ test("group creation and invitation acceptance work through the approved New cha
     await create
       .getByLabel("Description (optional)")
       .fill("Real creation form");
+    await create
+      .getByRole("button", { name: "Review group", exact: true })
+      .click();
+    await expect(create.getByLabel("Review group")).toContainText(
+      "must accept",
+    );
     await create
       .getByRole("button", { name: "Create group", exact: true })
       .click();

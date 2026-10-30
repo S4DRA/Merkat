@@ -8,13 +8,14 @@ test("manifest, tab icon, Apple icon and square approved logo assets are availab
     await page.request.get("/manifest.webmanifest")
   ).json();
   expect(manifest.display).toBe("standalone");
-  expect(manifest.name).toBe("Merkat");
+  expect(manifest.name).toBe("MERKAT");
   expect(manifest.icons.map((i: { sizes: string }) => i.sizes)).toEqual([
     "192x192",
     "512x512",
+    "512x512",
   ]);
   for (const icon of manifest.icons) {
-    expect(icon.purpose).toBe("any");
+    expect(["any", "maskable"]).toContain(icon.purpose);
     expect((await page.request.get(icon.src)).status()).toBe(200);
     const size = Number(icon.sizes.split("x")[0]);
     const dimensions = await page.evaluate(async (src: string) => {
@@ -33,18 +34,41 @@ test("manifest, tab icon, Apple icon and square approved logo assets are availab
     "/icons/merkat-180.png",
   );
   expect((await page.request.get("/favicon.ico")).status()).toBe(200);
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  const runtime = await page.evaluate(async () => ({
+    secure: isSecureContext,
+    serviceWorkers: (await navigator.serviceWorker.getRegistrations()).length,
+    cacheNames: await caches.keys(),
+  }));
+  expect(runtime.secure).toBe(true);
+  expect(runtime.serviceWorkers).toBe(1);
+  expect(runtime.cacheNames).toEqual(["merkat-public-20261030-1"]);
+  const cached = await page.evaluate(async () => {
+    const cache = await caches.open("merkat-public-20261030-1");
+    return (await cache.keys()).map((request) => new URL(request.url).pathname);
+  });
+  expect(cached).toContain("/offline.html");
   expect(
-    await page.evaluate(async () => ({
-      secure: isSecureContext,
-      serviceWorkers: (await navigator.serviceWorker.getRegistrations()).length,
-      cacheNames: await caches.keys(),
-    })),
-  ).toEqual({ secure: true, serviceWorkers: 0, cacheNames: [] });
+    cached.every(
+      (path) =>
+        path === "/offline.html" ||
+        path.startsWith("/icons/") ||
+        path.startsWith("/brand/") ||
+        path.startsWith("/_next/static/"),
+    ),
+  ).toBe(true);
   const cdp = await page.context().newCDPSession(page);
   const app = await cdp.send("Page.getAppManifest");
   expect(app.errors).toEqual([]);
   expect(app.data).toBeTruthy();
-  expect(JSON.parse(app.data!).short_name).toBe("Merkat");
+  expect(JSON.parse(app.data!).short_name).toBe("MERKAT");
+  await page.context().setOffline(true);
+  await page.goto("/chats");
+  await expect(
+    page.getByRole("heading", { name: "You’re offline." }),
+  ).toBeVisible();
+  await expect(page.locator(".direct-message")).toHaveCount(0);
+  await page.context().setOffline(false);
 });
 test("install controls preserve user gesture, show manual guidance and hide in standalone mode", async ({
   page,

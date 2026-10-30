@@ -1,10 +1,11 @@
 # Vercel build warnings
 
-October 30, 2026, Europe/Istanbul. Read-only inspection of the linked Merkat
-project confirms preview `dpl_33KZvTcNB5rueGjMWFqP7xeBNhSu`, commit `84e017a`,
-branch `new-chat/work/merkat-audit`, is **READY**. Its build and deployment completed.
-The preceding `b0d2b3e` preview is canceled. Production remains on `6ea62ba`.
-No deployment, project-setting change or production database change was performed.
+October 30, 2026, Europe/Istanbul. Live inspection confirms preview
+`dpl_6EHFzZ7os1rAvrTypwMX6Se5cZRV`, commit `d1a4f4d`, branch
+`new-chat/work/merkat-audit`, is **READY**. Its build log contains neither the
+unsupported cache-dir warning nor the unapproved install-script warning.
+The ESLint deprecation warning remains. At this inspection production is still
+on `6ea62ba`; the user subsequently authorized a production release.
 
 ## Corrections
 
@@ -18,8 +19,9 @@ No deployment, project-setting change or production database change was performe
   They cover Prisma/engines, Argon2, esbuild, the resolver, and the locked Linux
   and Windows embedded PostgreSQL packages. No blanket approval is used.
   `npm install-scripts ls --json` reports `allowScripts: []` on Windows.
-- **IMPLEMENTED, NOT LIVE-VERIFIED:** these repository settings will apply to a
-  future Vercel build. No new hosted build was triggered for this check.
+- **VERIFIED WORKING on Vercel:** the `d1a4f4d` preview ran the corrected commands,
+  completed installation, built successfully and deployed without those two
+  warning classes. This is preview verification, not a production release claim.
 
 The existing deployment's warnings did not prevent its successful build. npm's
 review policy in the pinned release is advisory; the scripts were not shown as

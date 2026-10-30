@@ -52,7 +52,12 @@ function messageView(m: Message): GroupMessageView {
     replyTo: m.replyTo,
   };
 }
-async function member(tx: Tx, userId: string, groupId: string, write = false) {
+export async function member(
+  tx: Tx,
+  userId: string,
+  groupId: string,
+  write = false,
+) {
   const rows = write
     ? await tx.$queryRaw<
         { id: string }[]
@@ -67,7 +72,7 @@ async function member(tx: Tx, userId: string, groupId: string, write = false) {
   if (!own) throw new SocialError("NOT_FOUND");
   return own;
 }
-function manager(role: string) {
+export function manager(role: string) {
   if (role !== "OWNER" && role !== "ADMIN") throw new SocialError("FORBIDDEN");
 }
 async function channel(tx: Tx, groupId: string, channelId: string) {
@@ -85,6 +90,7 @@ async function detail(
   const g = await tx.chatGroup.findUniqueOrThrow({
     where: { id: groupId },
     include: {
+      avatar: { select: { version: true } },
       members: {
         where: { leftAt: null },
         include: { user: { select: { profile: { select: profileSelect } } } },
@@ -127,6 +133,9 @@ async function detail(
   return {
     id: g.id,
     name: g.name,
+    avatarRef: g.avatar
+      ? `/api/groups/${g.id}/avatar?v=${g.avatar.version}`
+      : null,
     description: g.description,
     role: own.role,
     activityAt: g.activityAt.toISOString(),

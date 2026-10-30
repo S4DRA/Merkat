@@ -10,6 +10,7 @@ import {
 } from "@merkat/backend";
 import {
   createDatabase,
+  createGroupAvatarRepository,
   createAccountRepository,
   createPlanRepository,
   createCredentialRepository,
@@ -43,6 +44,7 @@ function createServices() {
     messaging: new MessagingService(createMessagingRepository(database)),
     friendships: new FriendshipService(createFriendshipRepository(database)),
     groups: new GroupService(createGroupRepository(database)),
+    groupAvatars: createGroupAvatarRepository(database),
     privacy: new PrivacyService(createPrivacyRepository(database)),
     authentication() {
       return (authentication ??= new AuthenticationService(

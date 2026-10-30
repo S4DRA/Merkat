@@ -33,6 +33,7 @@ import { GroupDestinationPicker } from "./group-destination-picker";
 import {
   dateKey,
   monthDays,
+  calendarRange,
   eventsForDay,
   weekStartsOn,
 } from "../../lib/calendar-view";
@@ -127,6 +128,11 @@ export function EventForm({
         ? new Date(`${initialDate}T10:00:00`)
         : new Date(Date.now() + 3600000);
     date.setMinutes(0, 0, 0);
+    if (initialDate && dateKey(date) !== initialDate) {
+      const chosen = new Date(`${initialDate}T10:00:00`);
+      chosen.setHours(Math.min(new Date().getHours() + 1, 23), 0, 0, 0);
+      return chosen;
+    }
     return date;
   });
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -608,41 +614,14 @@ function CalendarContent({ userId }: { userId: string }) {
   const days = monthDays(anchor, firstDay);
   const year = anchor.getFullYear(),
     month = anchor.getMonth();
-  const start = (
-    mode === "day"
-      ? new Date(`${selected}T00:00:00`)
-      : mode === "week"
-        ? new Date(
-            weekStart.getFullYear(),
-            weekStart.getMonth(),
-            weekStart.getDate(),
-          )
-        : mode === "agenda"
-          ? new Date(year, month, 1)
-          : days[0]!
-  ).toISOString();
-  const rangeEnd = (
-    mode === "day"
-      ? new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth(),
-          selectedDate.getDate() + 1,
-        )
-      : mode === "week"
-        ? new Date(
-            weekStart.getFullYear(),
-            weekStart.getMonth(),
-            weekStart.getDate() + 7,
-          )
-        : mode === "agenda"
-          ? new Date(year, month + 3, 1)
-          : new Date(
-              days[41]!.getFullYear(),
-              days[41]!.getMonth(),
-              days[41]!.getDate() + 1,
-            )
-  ).toISOString();
   const load = useCallback(async () => {
+    const { start, end: rangeEnd } = calendarRange(
+      year,
+      month,
+      selected,
+      mode,
+      firstDay,
+    );
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
@@ -678,7 +657,7 @@ function CalendarContent({ userId }: { userId: string }) {
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, [start, rangeEnd]);
+  }, [year, month, selected, mode, firstDay]);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const update = () => {

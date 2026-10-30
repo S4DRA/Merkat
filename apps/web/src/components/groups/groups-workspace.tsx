@@ -22,6 +22,7 @@ import { SocialDialog } from "../privacy-controls";
 import { GroupRows } from "./group-list";
 import { GroupSettings } from "./group-settings";
 import { PeoplePicker } from "../people-picker";
+import { saveGroupAvatar, validateGroupAvatar } from "./group-avatar-editor";
 import {
   GroupThread,
   type GroupPosition,
@@ -483,6 +484,8 @@ function CreateGroup({
     [error, setError] = useState("");
   const [people, setPeople] = useState<string[]>([]);
   const [review, setReview] = useState(false);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [createdGroup, setCreatedGroup] = useState<GroupDetail | null>(null);
   const clientId = useRef("");
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -495,14 +498,19 @@ function CreateGroup({
     setError("");
     clientId.current ||= crypto.randomUUID();
     try {
-      created(
-        await directRequest<GroupDetail>("groups/create", {
+      const group =
+        createdGroup ??
+        (await directRequest<GroupDetail>("groups/create", {
           clientId: clientId.current,
           name,
           description,
           usernames: people,
-        }),
-      );
+        }));
+      setCreatedGroup(group);
+      if (avatar) {
+        const result = await saveGroupAvatar(group.id, avatar);
+        created({ ...group, avatarRef: result.avatarRef });
+      } else created(group);
     } catch (e) {
       setError(directError(e));
     } finally {
@@ -540,6 +548,30 @@ function CreateGroup({
               disabled={pending}
               limit={20}
             />
+            <label>
+              Group avatar (optional)
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                disabled={pending}
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  try {
+                    if (file) validateGroupAvatar(file);
+                    setAvatar(file);
+                    setError("");
+                  } catch (error) {
+                    setError(
+                      error instanceof Error
+                        ? error.message
+                        : "Choose a valid image.",
+                    );
+                    event.target.value = "";
+                  }
+                }}
+              />
+            </label>
+            {avatar && <p>{avatar.name}</p>}
           </>
         ) : (
           <section aria-label="Review group">
@@ -550,9 +582,10 @@ function CreateGroup({
               <p key={person}>@{person}</p>
             ))}
             <p>People are invited and must accept before joining.</p>
+            {avatar && <p>Avatar: {avatar.name}</p>}
             <Button
               type="button"
-              disabled={pending}
+              disabled={pending || !!createdGroup}
               onClick={() => setReview(false)}
             >
               Back to details
@@ -560,8 +593,27 @@ function CreateGroup({
           </section>
         )}
         <Button type="submit" variant="primary" loading={pending}>
-          {review ? "Create group" : "Review group"}
+          {createdGroup
+            ? "Retry avatar"
+            : review
+              ? "Create group"
+              : "Review group"}
         </Button>
+        {createdGroup && (
+          <>
+            <p>
+              The group has been created. Retry the avatar or continue without
+              it.
+            </p>
+            <Button
+              type="button"
+              disabled={pending}
+              onClick={() => created(createdGroup)}
+            >
+              Open group without avatar
+            </Button>
+          </>
+        )}
         {error && <p role="alert">{error}</p>}
       </form>
     </SocialDialog>
