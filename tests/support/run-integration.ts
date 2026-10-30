@@ -18,6 +18,7 @@ try {
       "tests/integration/friendships.test.ts",
       "tests/integration/groups-privacy.test.ts",
       "tests/integration/production-recovery.test.ts",
+      "tests/integration/database-connections.test.ts",
     ],
     {
       stdio: "inherit",

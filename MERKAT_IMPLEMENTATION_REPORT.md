@@ -64,3 +64,27 @@ has not been silently imported into this production hotfix.
 
 See `MERKAT_TEST_RESULTS.md`, `MERKAT_UX_AUDIT.md`,
 `MERKAT_PWA_VERIFICATION.md` and `MERKAT_PRODUCTION_READINESS.md` for evidence and limits.
+
+## Follow-up: P2028 and session connection failures
+
+The user approved the production migration/runtime repair, then supplied local
+Next logs showing transaction acquisition failing at 2 seconds, missing schema
+and a 5-second connection failure during session lookup. Supabase is still not
+connected, so approved production execution remains blocked on owner access.
+
+Real local PostgreSQL/TCP fault tests were added before changing behavior. All
+three initial regressions failed: a 2.3-second handshake was rejected by Prisma's
+2-second default, a dropped session read failed instead of reconnecting, and a
+persistent outage made only one attempt. The fixes align transaction acquisition
+with the existing driver deadline and retry only the read-only session lookup
+once on known transient transport errors. Retries check current expiry; schema,
+authorization and transaction failures remain errors and writes are never replayed.
+
+Additional files: `packages/database/src/client.ts`, `account-repository.ts`,
+`connection-errors.ts`, `tests/integration/database-connections.test.ts`, the
+integration runner and the three implementation/test/readiness reports plus the
+recovery procedure. No schema, environment, pool size/mode, UI or branding edits.
+
+The shared package has been rebuilt. A running dev server needs a restart to
+replace its cached Prisma client. Production source has not been deployed; the
+production database is unchanged until owner access becomes available.

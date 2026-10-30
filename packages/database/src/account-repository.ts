@@ -6,6 +6,7 @@ import {
   type User,
   type Profile,
 } from "./generated/client.js";
+import { isTransientConnectionError } from "./connection-errors.js";
 
 export function account(user: User & { profile: Profile | null }): Account {
   if (!user.profile) throw new Error("Account profile missing");
@@ -71,11 +72,28 @@ export function createAccountRepository(db: PrismaClient): AccountRepository {
       }
     },
     async findSession(tokenHash, now) {
-      const session = await db.session.findFirst({
-        where: activeSession(tokenHash, now),
-        include: { user: { include: { profile: true } } },
-      });
-      return session ? account(session.user) : null;
+      const started = performance.now();
+      for (let attempt = 0; ; attempt++) {
+        try {
+          // Recheck expiry after a reconnect rather than accepting a session
+          // that expired during the first connection attempt. Preserve the
+          // service's injected clock by advancing it with elapsed time only.
+          const checkedAt =
+            attempt === 0
+              ? now
+              : new Date(now.getTime() + performance.now() - started);
+          const session = await db.session.findFirst({
+            where: activeSession(tokenHash, checkedAt),
+            include: { user: { include: { profile: true } } },
+          });
+          return session ? account(session.user) : null;
+        } catch (error) {
+          if (attempt !== 0 || !isTransientConnectionError(error)) throw error;
+          // A session SELECT is safe to retry once. Writes/transactions are not
+          // replayed, outages still throw, and no credential/SQL data is logged.
+          console.warn("Merkat session connection interrupted; retrying once.");
+        }
+      }
     },
     async revokeSession(tokenHash, now) {
       await db.session.updateMany({

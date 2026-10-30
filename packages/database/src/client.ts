@@ -16,6 +16,10 @@ export function createDatabase(input: Record<string, string | undefined>) {
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,
     }),
+    // A cold connection can take up to the driver's 5s deadline. Prisma's 2s
+    // default otherwise aborts a healthy transaction before connect completes.
+    // This changes acquisition only; repository transaction durations stay fixed.
+    transactionOptions: { maxWait: 6000 },
     log: [],
   });
 }

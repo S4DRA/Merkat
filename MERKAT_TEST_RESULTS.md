@@ -5,6 +5,42 @@ October 30, 2026, Europe/Istanbul. Current run on
 **11.4.2**, existing locked dependencies. Results from the other recovered
 checkout are not included in these counts.
 
+## Latest connection-error follow-up
+
+The user's additional logs were traced through Next's session guard, the real
+account repository, Prisma 7.10's installed transaction defaults, and the actual
+pg driver. The configured hosted database responded to read-only probes while
+`ChatGroup` was still missing. No hosted writes or environment changes were made.
+
+| Current check                        | Result                                                            |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| `npm run typecheck`                  | PASS, all workspaces and test/script types                        |
+| `npm run lint`                       | PASS, zero warnings                                               |
+| `npm test`                           | PASS: **67 integration tests + 2 API tests**, zero failures/skips |
+| `npm run build`                      | PASS, optimized Next production build                             |
+| `npm run test:ui -- --reporter=line` | PASS: **53 passed (2.4m)**, zero failures                         |
+| Approved production migration        | BLOCKED only on owner-capable access; approval has been received  |
+
+Before changing runtime behavior, three new real TCP/PostgreSQL regression tests
+failed against the baseline (62 existing tests passed, 3 failed). A 2.3-second
+connection exceeded Prisma's 2-second acquisition default despite fitting within
+the driver's 5-second deadline. A dropped session read was not recovered, and a
+persistent failure made only one attempt.
+
+After correction, all five connection regressions pass: delayed acquisition,
+fresh reconnect for a dropped session read, bounded failure after two attempts,
+expiry during reconnect staying unauthenticated, and permanent/schema/auth errors
+excluded from retry classification. A test-only nullable URL type error was
+corrected before the final successful typecheck. These tests use real local TCP
+faults and PostgreSQL, not HTTP mocks. No transaction/write retries were added.
+
+Evidence: `artifacts/connection-baseline.log`,
+`connection-final-tests.log`, `connection-typecheck.log`, `connection-lint.log`,
+`connection-build.log` and `connection-browser.log`. The rest of this report
+preserves the initial schema-repair run separately.
+
+## Initial schema-repair verification
+
 | Command/check                                               | Exact result                                                                                       |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `npm run build:packages`                                    | PASS: Prisma generated; contracts/backend/database compiled                                        |

@@ -2,6 +2,8 @@
 
 October 30, 2026, Europe/Istanbul. Scope: the reported Retry states in chats/groups.
 This procedure is prepared and locally tested. It has **not** been applied to production.
+The user has now explicitly approved this exact migration/runtime repair.
+Execution remains blocked on migration-owner access; do not ask for approval again.
 
 ## Evidence and cause
 
@@ -93,8 +95,25 @@ payloads. Reapplying runtime SQL also passes. Supabase SQL is represented by a
 local contract fixture; hosted websocket delivery is not claimed.
 
 Production migration/permissions and post-repair hosted acceptance remain blocked
-on authorization and owner-capable access. The available database credential is a
+on owner-capable access. Authorization has been received. The available database credential is a
 restricted runtime account. Supabase's connector is available but not connected.
 Do not broaden that runtime role to perform migrations. Source rollback cannot
 undo newly created production groups/messages safely; preserve new data and prefer
 a reviewed forward correction after upgrade.
+
+## New connection errors
+
+`P2028` at roughly 2 seconds is consistent with Prisma 7.10's default transaction
+acquisition wait expiring before the driver's 5-second connection deadline. This
+failure is reproduced using a real 2.3-second local TCP connection and corrected
+by a 6-second acquisition wait. Transaction execution limits remain unchanged.
+One classified dropped session read is retried on a fresh connection, with expiry
+rechecked. A persistent outage still throws. Neither change creates missing tables:
+the observed `P2021` still needs the already-approved migration/runtime repair.
+
+The configured hosted database was reachable in three read-only probes in this
+follow-up (459/43/44ms), and `ChatGroup` remained absent. These probes do not
+establish the cause of the earlier hosted 5-second network timeout or certify
+provider health. No connection URL, pool mode, pool size or TLS setting was changed.
+Restart the local dev server after updating/rebuilding these shared packages;
+its global runtime singleton retains the existing Prisma client until restart.
