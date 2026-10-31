@@ -1,0 +1,36 @@
+name: Production recovery acceptance
+on:
+  push:
+    branches: [fix/production-release-recovery]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: merkat-recovery-acceptance
+  cancel-in-progress: false
+jobs:
+  isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.17.0'
+          cache: npm
+      - run: npm install --global npm@11.21.1
+      - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run db:validate
+      - run: npm run test:unit
+      - run: npm test
+      - run: npm run build -w @merkat/web -- --webpack
+      - run: npm run build -w @merkat/worker
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui -- --reporter=line
+      - run: npm run test:components
+# Only fresh local fixture databases; no production secrets, data, or deployment.
