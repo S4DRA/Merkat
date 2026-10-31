@@ -171,6 +171,12 @@ export function AuthenticationForm({
         method="post"
         action={`/api/account/${register ? "register" : "login"}`}
         onSubmit={submit}
+        onInput={(event) => {
+          const field = (event.target as HTMLInputElement).name;
+          // Clear corrected errors while typing so blur cannot move the submit
+          // button between pointer-down and pointer-up.
+          if (field && fieldErrors[field]) validate(event.currentTarget, field);
+        }}
         noValidate
         aria-busy={pending}
       >

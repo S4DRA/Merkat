@@ -31,6 +31,7 @@ jobs:
       - run: npm run build -w @merkat/web -- --webpack
       - run: npm run build -w @merkat/worker
       - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui -- tests/browser/password-auth.spec.ts tests/browser/refinement.spec.ts --reporter=line
       - run: npm run test:ui -- --reporter=line
       - run: npm run test:components
 # Only fresh local fixture databases; no production secrets, data, or deployment.

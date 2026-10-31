@@ -308,6 +308,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
 }) => {
   test.setTimeout(90000);
   const contexts: BrowserContext[] = [];
+  let stage = "prepare fixture contexts";
   try {
     for (const fixture of [
       "authenticated",
@@ -353,6 +354,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
       names.push((await session.json()).user.profile.username);
     }
     const page = await owner.newPage();
+    stage = "select group participants";
     await page.goto("/groups?new=1");
     const dialog = page.getByRole("dialog", {
       name: "Create group",
@@ -384,6 +386,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
       "2 invitations",
     );
     let creates = 0;
+    stage = "create group with injected avatar failure";
     page.on("request", (request) => {
       if (request.url().endsWith("/api/groups/create")) creates++;
     });
@@ -399,6 +402,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
       dialog.getByRole("button", { name: "Retry avatar", exact: true }),
     ).toBeVisible();
     await page.unroute("**/api/groups/*/avatar");
+    stage = "retry avatar";
     await dialog
       .getByRole("button", { name: "Retry avatar", exact: true })
       .click();
@@ -410,6 +414,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
     expect(photo.headers()["cache-control"]).toBe("private, no-store");
     expect(photo.headers()["content-type"]).toBe("image/jpeg");
     for (const context of [peer, third]) {
+      stage = "accept group invitations";
       const pending = await post<GroupList>(context, "groups/list", {});
       expect(pending.groups.some((g) => g.id === groupId)).toBe(false);
       expect(
@@ -434,6 +439,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
     );
     expect(unauthorizedEdit.status()).toBe(403);
     await page.goto("/plans");
+    stage = "create group calendar activity";
     await page.getByRole("button", { name: "New plan", exact: true }).click();
     await page.getByLabel(/What.s the plan/).fill(`Group activity ${name}`);
     await page.getByLabel("Activity visibility").selectOption("group");
@@ -458,6 +464,7 @@ test("real group creation reviews two invitations, retries an avatar failure onc
     expect(event.participants).toHaveLength(3);
     expect(event.participants.filter((p) => p.subscribed)).toHaveLength(1);
     const recipient = await peer.newPage();
+    stage = "recipient RSVP";
     await recipient.goto(`/plans?event=${event.id}`);
     await recipient.getByRole("button", { name: "Going", exact: true }).click();
     await expect(
@@ -488,7 +495,18 @@ test("real group creation reviews two invitations, retries an avatar failure onc
     await expect(
       recipient.locator(`.calendar-day[aria-label^="${label},"] .calendar-dot`),
     ).toHaveCount(0);
+  } catch (error) {
+    console.error("Group acceptance stage:", stage);
+    console.error(
+      error instanceof Error
+        ? error.message.split("\n").slice(0, 5).join("\n")
+        : "Unknown acceptance failure",
+    );
+    throw error;
   } finally {
-    await Promise.all(contexts.map((context) => context.close()));
+    await Promise.race([
+      Promise.allSettled(contexts.map((context) => context.close())),
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+    ]);
   }
 });
