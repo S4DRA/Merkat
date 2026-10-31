@@ -6,7 +6,7 @@ import { Button, IconButton, Badge } from "../ui/primitives";
 import { directRequest, directError } from "../../lib/direct-client";
 import { useDirectRealtime } from "../chats/use-direct-realtime";
 import { DirectRequestError } from "../../lib/direct-client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 const onInvalidation = () => {};
 type Notice = {
   id: string;
@@ -18,6 +18,7 @@ type Notice = {
 };
 export function NotificationCenter() {
   const router = useRouter();
+  const pathname = usePathname();
   const unauthorized = useCallback(
     (error: unknown) => {
       if (
@@ -30,7 +31,14 @@ export function NotificationCenter() {
     },
     [router],
   );
-  useDirectRealtime(onInvalidation, unauthorized, 0);
+  // These workspaces already broadcast reconciliation events for this session.
+  // Calendar/profile/settings still need their own subscription for the inbox.
+  useDirectRealtime(
+    onInvalidation,
+    unauthorized,
+    0,
+    !["/chats", "/friends", "/groups"].includes(pathname),
+  );
   const dialog = useRef<HTMLDialogElement>(null);
   const fetching = useRef(false),
     queued = useRef(false);

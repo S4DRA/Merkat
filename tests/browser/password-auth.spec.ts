@@ -176,7 +176,7 @@ test("registration validates optional email/reserved names, keeps inputs visible
     ),
   ).toBe(true);
   await page.setViewportSize({ width: 320, height: 700 });
-  await page.route("**/api/account/register", (route) => route.abort("failed"));
+  await page.context().setOffline(true);
   await page
     .getByRole("button", { name: "Create account", exact: true })
     .click();
@@ -186,6 +186,7 @@ test("registration validates optional email/reserved names, keeps inputs visible
   await expect(
     page.getByRole("button", { name: "Create account", exact: true }),
   ).toBeEnabled();
+  await page.context().setOffline(false);
   await page.getByRole("link", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goBack();

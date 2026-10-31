@@ -43,7 +43,9 @@ for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440]) {
       expect(rect!.width).toBeGreaterThanOrEqual(44);
     }
     await expect(
-      page.getByRole("navigation").getByRole("button", { name: "Create a chat or group", exact: true }),
+      page
+        .getByRole("navigation")
+        .getByRole("button", { name: "Create a chat or group", exact: true }),
     ).toBeVisible();
     await page.goto("/calls");
     const overview = page.getByRole("region", { name: "Calls overview" });
@@ -120,10 +122,7 @@ test("keyboard, dialog focus, secondary routes and reduced motion", async ({
     .getByRole("navigation")
     .getByRole("link", { name: "Profile" })
     .click();
-  await page
-    .getByRole("link", { name: "Settings", exact: true })
-    .last()
-    .click();
+  await page.getByRole("link", { name: /Appearance & comfort/ }).click();
   await expect(
     page.getByRole("heading", { name: "Settings", exact: true }),
   ).toBeVisible();

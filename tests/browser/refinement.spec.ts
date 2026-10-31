@@ -59,7 +59,11 @@ test("native touch hold-drag selects only the two creation actions and cancellat
     ).toBeVisible();
     await page
       .getByRole("button", { name: "Close new chat", exact: true })
-      .click();
+      .tap();
+    await expect(page).toHaveURL(/\/chats$/);
+    await expect(
+      page.getByRole("dialog", { name: "New chat", exact: true }),
+    ).toHaveCount(0);
     await hold();
     const group = (await page
       .getByRole("menuitem", { name: "New Group", exact: true })
@@ -315,6 +319,9 @@ test("real group creation reviews two invitations, retries an avatar failure onc
           baseURL: baseURL!,
           ignoreHTTPSErrors: true,
           storageState: `artifacts/${fixture}-state.json`,
+          // Route aborts target the real HTTP request; active service workers
+          // can otherwise bypass Playwright interception. PWA has its own suite.
+          serviceWorkers: "block",
         }),
       );
     }
@@ -436,13 +443,16 @@ test("real group creation reviews two invitations, retries an avatar failure onc
     const created = page.waitForResponse(
       (response) =>
         response.url().endsWith("/api/calendar/create") &&
-        response.status() === 201,
+        response.request().method() === "POST",
+      { timeout: 15000 },
     );
     await page
       .getByRole("button", { name: "Create plan", exact: true })
       .click();
+    const createdResponse = await created;
+    expect(createdResponse.status()).toBe(201);
     const event = (
-      (await (await created).json()) as { event: CalendarEventView }
+      (await createdResponse.json()) as { event: CalendarEventView }
     ).event;
     expect(event.scope?.id).toBe(groupId);
     expect(event.participants).toHaveLength(3);

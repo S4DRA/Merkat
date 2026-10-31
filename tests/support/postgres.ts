@@ -1,6 +1,6 @@
 import EmbeddedPostgres from "embedded-postgres";
 import { randomBytes, randomUUID } from "node:crypto";
-import { mkdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { resolve, sep } from "node:path";
 import { createServer } from "node:net";
 import { execFile } from "node:child_process";
@@ -11,6 +11,7 @@ export async function startTestDatabase(
   options: {
     migrate?: boolean;
     tls?: { certificate: string; key: string };
+    restartable?: boolean;
   } = {},
 ) {
   await requireTestLoopback();
@@ -39,7 +40,7 @@ export async function startTestDatabase(
     user,
     password,
     port,
-    persistent: false,
+    persistent: options.restartable ?? false,
     authMethod: "scram-sha-256",
     // Prisma's pg adapter serializes UTC wall time; match Supabase's default UTC server timezone.
     postgresFlags: [
@@ -62,6 +63,12 @@ export async function startTestDatabase(
     onError: (error) =>
       console.error(String(error).replaceAll(password, "[redacted]")),
   });
+  async function stop() {
+    await database.stop();
+    // Only this freshly generated and containment-checked fixture directory.
+    if (options.restartable)
+      await rm(databaseDir, { recursive: true, force: true });
+  }
   try {
     await database.initialise();
     await database.start();
@@ -76,9 +83,17 @@ export async function startTestDatabase(
           timeout: 60000,
         },
       );
-    return { url, stop: () => database.stop() };
+    return {
+      url,
+      stop,
+      async restart() {
+        if (!options.restartable) throw new Error("Fixture is not restartable");
+        await database.stop();
+        await database.start();
+      },
+    };
   } catch (error) {
-    await database.stop();
+    await stop();
     throw error;
   }
 }

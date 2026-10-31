@@ -2,7 +2,13 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { MessageCirclePlus, Users } from "lucide-react";
 
 const actions = [
@@ -23,6 +29,7 @@ export function QuickCreate() {
     active: boolean;
   } | null>(null);
   const suppressClick = useRef(false);
+  const focusMenu = useRef(false);
   const [open, setOpen] = useState(false);
   const [pressed, setPressed] = useState(false);
   const [target, setTarget] = useState<number | null>(null);
@@ -31,6 +38,7 @@ export function QuickCreate() {
     clearTimeout(timer.current);
     if (gesture.current) suppressClick.current = true;
     gesture.current = null;
+    focusMenu.current = false;
     setOpen(false);
     setPressed(false);
     setTarget(null);
@@ -52,9 +60,15 @@ export function QuickCreate() {
       ),
       y: Math.max(top + 12, Math.min(rect.top - 96, top + height - 96)),
     });
+    focusMenu.current = focus;
     setOpen(true);
-    if (focus) requestAnimationFrame(() => items.current[0]?.focus());
   }, []);
+  useLayoutEffect(() => {
+    if (open && focusMenu.current) {
+      focusMenu.current = false;
+      items.current[0]?.focus();
+    }
+  }, [open]);
   function hit(x: number, y: number) {
     const index = items.current.findIndex((item) => {
       const r = item?.getBoundingClientRect();

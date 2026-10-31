@@ -71,6 +71,20 @@ test("onboarding, profile save and logout use real sessions", async ({
     .getByRole("link", { name: "Profile" })
     .click();
   await page.getByRole("link", { name: "Edit profile" }).first().click();
+  await expect(page.locator("form.account-form")).toHaveAttribute(
+    "data-dirty",
+    "false",
+  );
+  await page.getByLabel("Display name").fill("Temporary unsaved name");
+  await expect(page.locator("form.account-form")).toHaveAttribute(
+    "data-dirty",
+    "true",
+  );
+  await page.getByLabel("Display name").fill("New Account");
+  await expect(page.locator("form.account-form")).toHaveAttribute(
+    "data-dirty",
+    "false",
+  );
   await page.getByLabel("Display name").fill("Changed Name");
   await page.getByLabel("Bio").fill("Updated profile");
   await page.getByRole("button", { name: "Save" }).click();

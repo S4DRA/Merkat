@@ -8,11 +8,13 @@ export function useDirectRealtime(
   onChange: () => void,
   onUnauthorized: (error: unknown) => void,
   attempt: number,
+  enabled = true,
 ) {
   const [state, setState] = useState<
     "connecting" | "live" | "reconnecting" | "unavailable"
   >("connecting");
   useEffect(() => {
+    if (!enabled) return;
     let disposed = false;
     let capability: RealtimeCapability | undefined;
     let client: ReturnType<typeof createClient> | undefined;
@@ -107,6 +109,6 @@ export function useDirectRealtime(
       document.removeEventListener("visibilitychange", wake);
       client?.realtime.disconnect();
     };
-  }, [onChange, onUnauthorized, attempt]);
+  }, [onChange, onUnauthorized, attempt, enabled]);
   return state;
 }

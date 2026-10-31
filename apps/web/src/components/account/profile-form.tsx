@@ -7,6 +7,7 @@ import { AvatarEditor } from "./avatar-editor";
 export function ProfileForm({ account }: { account: Account }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,7 +59,20 @@ export function ProfileForm({ account }: { account: Account }) {
         avatarRef={account.profile.avatarRef}
         name={account.profile.displayName ?? account.profile.username ?? "Your"}
       />
-      <form onSubmit={submit} className="account-form">
+      <form
+        onSubmit={submit}
+        className="account-form"
+        data-dirty={dirty}
+        aria-busy={pending || undefined}
+        onChange={(event) => {
+          const values = new FormData(event.currentTarget);
+          setDirty(
+            values.get("displayName") !== (account.profile.displayName ?? "") ||
+              values.get("username") !== (account.profile.username ?? "") ||
+              (values.get("bio") ?? "") !== account.profile.bio,
+          );
+        }}
+      >
         <label>
           Display name
           <input
