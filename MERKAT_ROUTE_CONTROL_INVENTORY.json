@@ -1,0 +1,2249 @@
+{
+  "scope": "Static source inventory; not proof that every dynamic control was tested",
+  "pages": [
+    "/",
+    "/login",
+    "/onboarding",
+    "/profile/edit",
+    "/recover",
+    "/register",
+    "/{destination}"
+  ],
+  "api_methods": {
+    "health/live": [
+      "GET"
+    ],
+    "auth/session": [
+      "GET"
+    ],
+    "auth/register": [
+      "POST"
+    ],
+    "auth/login": [
+      "POST"
+    ],
+    "auth/logout": [
+      "POST"
+    ],
+    "auth/session/rotate": [
+      "POST"
+    ],
+    "account/profile": [
+      "PATCH"
+    ],
+    "profiles/view": [
+      "POST"
+    ],
+    "preferences/get": [
+      "POST"
+    ],
+    "preferences/update": [
+      "POST"
+    ],
+    "calendar/list": [
+      "POST"
+    ],
+    "calendar/conversation": [
+      "POST"
+    ],
+    "calendar/detail": [
+      "POST"
+    ],
+    "calendar/create": [
+      "POST"
+    ],
+    "calendar/respond": [
+      "POST"
+    ],
+    "calendar/edit": [
+      "POST"
+    ],
+    "calendar/cancel": [
+      "POST"
+    ],
+    "calendar/share": [
+      "POST"
+    ],
+    "notifications/list": [
+      "POST"
+    ],
+    "notifications/read": [
+      "POST"
+    ],
+    "security/status": [
+      "POST"
+    ],
+    "security/recover": [
+      "POST"
+    ],
+    "push/config": [
+      "POST"
+    ],
+    "push/subscribe": [
+      "POST"
+    ],
+    "push/remove": [
+      "POST"
+    ],
+    "push/status": [
+      "POST"
+    ],
+    "tabs/list": [
+      "POST"
+    ],
+    "tabs/detail": [
+      "POST"
+    ],
+    "tabs/create": [
+      "POST"
+    ],
+    "tabs/act": [
+      "POST"
+    ],
+    "tabs/context": [
+      "POST"
+    ],
+    "auth/phone/start": [
+      "POST"
+    ],
+    "auth/phone/verify": [
+      "POST"
+    ],
+    "people/find": [
+      "POST"
+    ],
+    "messaging/connect": [
+      "POST"
+    ],
+    "messaging/rooms": [
+      "POST"
+    ],
+    "direct/list": [
+      "POST"
+    ],
+    "direct/open": [
+      "POST"
+    ],
+    "direct/messages": [
+      "POST"
+    ],
+    "direct/send": [
+      "POST"
+    ],
+    "direct/receipt": [
+      "POST"
+    ],
+    "direct/realtime": [
+      "POST"
+    ],
+    "friends/list": [
+      "POST"
+    ],
+    "friends/request": [
+      "POST"
+    ],
+    "friends/act": [
+      "POST"
+    ],
+    "groups/list": [
+      "POST"
+    ],
+    "groups/create": [
+      "POST"
+    ],
+    "groups/detail": [
+      "POST"
+    ],
+    "groups/edit": [
+      "POST"
+    ],
+    "groups/invite": [
+      "POST"
+    ],
+    "groups/invitation": [
+      "POST"
+    ],
+    "groups/member": [
+      "POST"
+    ],
+    "groups/leave": [
+      "POST"
+    ],
+    "groups/channel/create": [
+      "POST"
+    ],
+    "groups/channel/edit": [
+      "POST"
+    ],
+    "groups/messages": [
+      "POST"
+    ],
+    "groups/send": [
+      "POST"
+    ],
+    "groups/receipt": [
+      "POST"
+    ],
+    "privacy/settings": [
+      "POST"
+    ],
+    "privacy/update": [
+      "POST"
+    ],
+    "privacy/blocks": [
+      "POST"
+    ],
+    "privacy/block": [
+      "POST"
+    ],
+    "privacy/report": [
+      "POST"
+    ]
+  },
+  "legacy_methods": {
+    "plans": [
+      "GET",
+      "POST",
+      "PATCH"
+    ]
+  },
+  "controls": [
+    {
+      "source": "apps/web/src/components/people-picker.tsx",
+      "line": 43,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/people-picker.tsx",
+      "line": 63,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/people-picker.tsx",
+      "line": 76,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/people-picker.tsx",
+      "line": 94,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/pwa-runtime.tsx",
+      "line": 65,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/pwa-runtime.tsx",
+      "line": 88,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/shell-navigation.tsx",
+      "line": 38,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 46,
+      "element": "Link",
+      "label_or_target": "/search",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 73,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 106,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 118,
+      "element": "Link",
+      "label_or_target": "/settings",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 125,
+      "element": "Link",
+      "label_or_target": "/profile",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 144,
+      "element": "IconButton",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 153,
+      "element": "IconButton",
+      "label_or_target": "About this space",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 180,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 223,
+      "element": "IconButton",
+      "label_or_target": "Close information",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 255,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/app-shell.tsx",
+      "line": 258,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/quick-create.tsx",
+      "line": 114,
+      "element": "button",
+      "label_or_target": "Create a chat or group",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/quick-create.tsx",
+      "line": 245,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/install-app.tsx",
+      "line": 95,
+      "element": "IconButton",
+      "label_or_target": "Close install",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/install-app.tsx",
+      "line": 116,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/install-app.tsx",
+      "line": 133,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 38,
+      "element": "IconButton",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 89,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 92,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 95,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 107,
+      "element": "textarea",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 115,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 153,
+      "element": "IconButton",
+      "label_or_target": "Conversation options",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 165,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 168,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 274,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 276,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 292,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 309,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 320,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 326,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/privacy-controls.tsx",
+      "line": 333,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/appearance.tsx",
+      "line": 167,
+      "element": "input",
+      "label_or_target": "theme",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/appearance.tsx",
+      "line": 194,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/appearance.tsx",
+      "line": 206,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/app/error.tsx",
+      "line": 8,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 202,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 219,
+      "element": "input",
+      "label_or_target": "title",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 231,
+      "element": "input",
+      "label_or_target": "start",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 243,
+      "element": "input",
+      "label_or_target": "end",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 256,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 276,
+      "element": "input",
+      "label_or_target": "location",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 285,
+      "element": "textarea",
+      "label_or_target": "description",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 296,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 319,
+      "element": "input",
+      "label_or_target": "invitees",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 345,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 348,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 418,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 465,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 482,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 520,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 525,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 538,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 541,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 550,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 562,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 767,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 783,
+      "element": "IconButton",
+      "label_or_target": "Previous month",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 791,
+      "element": "IconButton",
+      "label_or_target": "Next month",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 796,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 807,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 821,
+      "element": "input",
+      "label_or_target": "Search calendar",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 828,
+      "element": "select",
+      "label_or_target": "Filter plans",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 846,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 860,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 917,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 960,
+      "element": "IconButton",
+      "label_or_target": "Close calendar details",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 1000,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/calendar-workspace.tsx",
+      "line": 1019,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 108,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 115,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 127,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 136,
+      "element": "input",
+      "label_or_target": "title",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 141,
+      "element": "input",
+      "label_or_target": "startsAt",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 150,
+      "element": "input",
+      "label_or_target": "endsAt",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 161,
+      "element": "input",
+      "label_or_target": "location",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 165,
+      "element": "textarea",
+      "label_or_target": "description",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 169,
+      "element": "input",
+      "label_or_target": "usernames",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 179,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 219,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 228,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/plan-workspace.tsx",
+      "line": 245,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/group-destination-picker.tsx",
+      "line": 49,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/group-destination-picker.tsx",
+      "line": 86,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 90,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 99,
+      "element": "input",
+      "label_or_target": "title",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 109,
+      "element": "select",
+      "label_or_target": "currency",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 120,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 144,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 152,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 293,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 343,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 351,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 361,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 373,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 384,
+      "element": "select",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 401,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 415,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 432,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 446,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 458,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 512,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 525,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 545,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 565,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 584,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 655,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 681,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 706,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 719,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 734,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 743,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 816,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 839,
+      "element": "input",
+      "label_or_target": "Amount you paid the venue",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/tab-workspace.tsx",
+      "line": 847,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/plans/notification-center.tsx",
+      "line": 106,
+      "element": "IconButton",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/notification-center.tsx",
+      "line": 123,
+      "element": "IconButton",
+      "label_or_target": "Close notifications",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/notification-center.tsx",
+      "line": 131,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/notification-center.tsx",
+      "line": 147,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 122,
+      "element": "Button",
+      "label_or_target": "Conversation plans and tabs",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 145,
+      "element": "IconButton",
+      "label_or_target": "Close conversation tools",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 152,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 165,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 169,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 173,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 189,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 216,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 248,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 333,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/plans/conversation-features.tsx",
+      "line": 390,
+      "element": "IconButton",
+      "label_or_target": "Close activity",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/search-workspace.tsx",
+      "line": 68,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/search-workspace.tsx",
+      "line": 71,
+      "element": "input",
+      "label_or_target": "Exact username",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/search-workspace.tsx",
+      "line": 82,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/friends/search-workspace.tsx",
+      "line": 94,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/search-workspace.tsx",
+      "line": 97,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 180,
+      "element": "IconButton",
+      "label_or_target": "Find friends",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 207,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 231,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 245,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 271,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 293,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 301,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 312,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 321,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 331,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 344,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 433,
+      "element": "IconButton",
+      "label_or_target": "Close find friends",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 435,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 439,
+      "element": "input",
+      "label_or_target": "username",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 456,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/friends/friends-workspace.tsx",
+      "line": 473,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/account-controls.tsx",
+      "line": 63,
+      "element": "Link",
+      "label_or_target": "/profile/edit",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/account-controls.tsx",
+      "line": 66,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/phone-form.tsx",
+      "line": 29,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/phone-form.tsx",
+      "line": 30,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/phone-form.tsx",
+      "line": 32,
+      "element": "input",
+      "label_or_target": "token",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/phone-form.tsx",
+      "line": 34,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/phone-form.tsx",
+      "line": 35,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 33,
+      "element": "input",
+      "label_or_target": "password",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 52,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 168,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 185,
+      "element": "input",
+      "label_or_target": "username",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 233,
+      "element": "input",
+      "label_or_target": "email",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 269,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 278,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/authentication-form.tsx",
+      "line": 285,
+      "element": "Link",
+      "label_or_target": "/recover",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/notification-preferences.tsx",
+      "line": 126,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/notification-preferences.tsx",
+      "line": 133,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-workspace.tsx",
+      "line": 27,
+      "element": "Link",
+      "label_or_target": "/profile/edit",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-workspace.tsx",
+      "line": 41,
+      "element": "Link",
+      "label_or_target": "/profile/edit",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-workspace.tsx",
+      "line": 49,
+      "element": "Link",
+      "label_or_target": "/settings#appearance-title",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-workspace.tsx",
+      "line": 57,
+      "element": "Link",
+      "label_or_target": "/settings#privacy",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-workspace.tsx",
+      "line": 65,
+      "element": "Link",
+      "label_or_target": "/plans",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-form.tsx",
+      "line": 62,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-form.tsx",
+      "line": 78,
+      "element": "input",
+      "label_or_target": "displayName",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/profile-form.tsx",
+      "line": 89,
+      "element": "input",
+      "label_or_target": "username",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/profile-form.tsx",
+      "line": 109,
+      "element": "textarea",
+      "label_or_target": "bio",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/profile-form.tsx",
+      "line": 123,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/profile-preview.tsx",
+      "line": 41,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-preview.tsx",
+      "line": 64,
+      "element": "IconButton",
+      "label_or_target": "Close profile",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/profile-preview.tsx",
+      "line": 74,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 82,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 88,
+      "element": "input",
+      "label_or_target": "currentPassword",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 98,
+      "element": "input",
+      "label_or_target": "newPassword",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 107,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 118,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 121,
+      "element": "input",
+      "label_or_target": "currentPassword",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 129,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 142,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 146,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 186,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 193,
+      "element": "input",
+      "label_or_target": "username",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 203,
+      "element": "input",
+      "label_or_target": "code",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 213,
+      "element": "input",
+      "label_or_target": "newPassword",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/security-controls.tsx",
+      "line": 222,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/account/settings-workspace.tsx",
+      "line": 10,
+      "element": "Link",
+      "label_or_target": "/profile",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/avatar-editor.tsx",
+      "line": 101,
+      "element": "input",
+      "label_or_target": "Choose profile photo",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/avatar-editor.tsx",
+      "line": 110,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/account/avatar-editor.tsx",
+      "line": 115,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 309,
+      "element": "IconButton",
+      "label_or_target": "Find people",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 325,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 354,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 365,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 371,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 399,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 427,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 525,
+      "element": "IconButton",
+      "label_or_target": "Close new chat",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 527,
+      "element": "Link",
+      "label_or_target": "/groups?new=1",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 530,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 534,
+      "element": "input",
+      "label_or_target": "username",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 551,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 568,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 850,
+      "element": "Link",
+      "label_or_target": "/chats",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 887,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 893,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 921,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1000,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1009,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1024,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1041,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1045,
+      "element": "textarea",
+      "label_or_target": "message",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/chats/chats-workspace.tsx",
+      "line": 1067,
+      "element": "Button",
+      "label_or_target": "Send message",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 118,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 130,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 144,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 171,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 184,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 194,
+      "element": "textarea",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 201,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 221,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 224,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 234,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 241,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 256,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 262,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 270,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 301,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 304,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 325,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 345,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 368,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 377,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 386,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-settings.tsx",
+      "line": 390,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-list.tsx",
+      "line": 18,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-list.tsx",
+      "line": 74,
+      "element": "Link",
+      "label_or_target": "/groups",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-list.tsx",
+      "line": 80,
+      "element": "Link",
+      "label_or_target": "/groups?new=1",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-list.tsx",
+      "line": 90,
+      "element": "Link",
+      "label_or_target": "/groups",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-list.tsx",
+      "line": 97,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 310,
+      "element": "IconButton",
+      "label_or_target": "Create group",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 324,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 348,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 356,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 363,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 377,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 386,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 395,
+      "element": "Link",
+      "label_or_target": "/chats",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 433,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 522,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 527,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 538,
+      "element": "textarea",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 553,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 586,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 595,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/groups-workspace.tsx",
+      "line": 608,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 417,
+      "element": "Link",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 427,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 451,
+      "element": "IconButton",
+      "label_or_target": "Group settings",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 460,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 490,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 515,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 566,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 576,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 601,
+      "element": "IconButton",
+      "label_or_target": "Cancel reply",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 609,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 627,
+      "element": "form",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 628,
+      "element": "textarea",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-thread.tsx",
+      "line": 650,
+      "element": "Button",
+      "label_or_target": "Send message",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/groups/group-avatar-editor.tsx",
+      "line": 67,
+      "element": "input",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/groups/group-avatar-editor.tsx",
+      "line": 79,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/components/ui/primitives.tsx",
+      "line": 17,
+      "element": "button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/components/ui/primitives.tsx",
+      "line": 40,
+      "element": "Button",
+      "label_or_target": "dynamic/child text",
+      "handler_present": false
+    },
+    {
+      "source": "apps/web/src/app/recover/page.tsx",
+      "line": 8,
+      "element": "Link",
+      "label_or_target": "/login",
+      "handler_present": true
+    },
+    {
+      "source": "apps/web/src/app/profile/edit/page.tsx",
+      "line": 10,
+      "element": "Link",
+      "label_or_target": "/profile",
+      "handler_present": true
+    }
+  ]
+}

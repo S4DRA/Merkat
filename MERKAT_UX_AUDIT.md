@@ -1,33 +1,47 @@
-# MERKAT route and action audit
+# MERKAT UX audit — 31 October 2026
 
-October 30, 2026. Inventory of the actually deployed `6ea62ba` source. Scope is the
-reported chat/group Retry regression; this is not full acceptance of the larger
-attached redesign. Existing product visuals and controls were preserved.
+Scope: actual route discovery and control-source inspection, plus browser acceptance. This is not a claim that every possible dynamic interaction received manual physical-device review.
 
-| Route/screen                            | Controls and intended behavior                                     | Actual implementation                                         | Verification / remaining issue                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `/`                                     | App entry                                                          | Redirects to Chats                                            | Existing route tests                                                                                           |
-| `/login`, `/register`                   | Username/password, optional email, install                         | Real sessions, no mandatory verification                      | Existing auth service/browser suites; no production test accounts created                                      |
-| `/onboarding`, `/profile/edit`          | Profile completion/edit                                            | Persisted profile and session checks                          | Existing account service/browser suites                                                                        |
-| `/chats`                                | DM/group list, retry, search, new chat/group                       | Real HTTP calls and persistent services                       | Confirmed production 503s; migration repair passes locally, live repair pending                                |
-| `/chats?conversation=…`                 | History, send/retry, receipts, back, profile/privacy controls      | Member-scoped persistent DM                                   | Recovery test preserves old messages and dedupes new sends                                                     |
-| `/chats?new=1`                          | Find username and open existing/new DM                             | Exact username lookup and deduped pair creation               | Missing quota columns explain failing search; restored locally                                                 |
-| `/groups`, `/chats?group=…`             | Group list/invites, channels/history, send/reply, details/settings | Real group/member/role services                               | Missing group tables explain retry; creation, acceptance, send/list/history and outsider denial tested locally |
-| `/friends`                              | Find/request/accept/decline/remove friends                         | Real friendship services with privacy checks                  | Existing tests; same schema gap also affects privacy-aware interactions                                        |
-| `/profile`                              | View/edit identity, sign out, settings/install                     | Real profile controls                                         | Existing tests                                                                                                 |
-| `/settings`                             | Profile/install/privacy/block/report controls                      | Real privacy service, requires missing tables                 | Existing tests; runtime SQL required                                                                           |
-| `/plans` (Calendar navigation label)    | Shell exploration/about/back                                       | Structural shell, not the recovered candidate's calendar grid | NOT IMPLEMENTED: attached month/dots/day-sheet/calendar acceptance in deployed revision                        |
-| `/calls`, `/search`                     | Shell exploration/about/back                                       | Explicit structural shells                                    | NOT IMPLEMENTED: calling/global search; no fictitious backend added                                            |
-| Center logo navigation                  | Open New chat                                                      | Link to `/chats?new=1`                                        | NOT IMPLEMENTED: attached hold-and-drag interaction in deployed revision                                       |
-| `/api/[...path]`                        | Canonical auth/DM/friend/group/privacy/legacy plans APIs           | Validated server handlers and no-store responses              | Real service/HTTP suite; safe error diagnostics added                                                          |
-| `/api/account/[...path]`                | Account compatibility aliases                                      | Existing canonical adaptation                                 | Existing tests                                                                                                 |
-| `/api/matrix/[...path]`                 | Inactive compatibility surface                                     | No active Matrix architecture                                 | No migration or redesign performed                                                                             |
-| `/health/live`, `/manifest.webmanifest` | Liveness/manifest                                                  | Existing route handlers                                       | Existing tests/build                                                                                           |
-| Unknown destinations                    | Reject invalid routes                                              | Next `notFound()`                                             | Existing route tests                                                                                           |
+## Route inventory
 
-Chat-only spending tabs, the richer calendar, avatars, recovery, notifications,
-theme/accessibility preferences and a durable reminder/push worker are described
-in the recovered `a481829` reports. Those features are not all present in the
-actual production revision; this audit does not label them live or merge them
-without a separate implementation/release review. No global Tabs navigation was
-added. No UI changed, so meaningful before/after design screenshots do not apply.
+Seven page files implement /, /login, /register, /recover, /onboarding, /profile/edit and /[destination].
+The destination registry expands to /chats, /calls, /plans, /groups, /profile, /friends, /search and /settings. Unknown destinations call notFound.
+
+There are dedicated avatar routes, internal reminders, health, inactive Matrix routes and a shared API handler. Static discovery found 63 quoted API method paths plus the legacy plans handler, and 291 JSX control occurrences. The accompanying route-controls inventory is a source inventory, not behavioral proof.
+
+| Journey | Verified scope / limitation |
+|---|---|
+| Login/register | Real immediate entry, secure sessions, validation, small viewports, ordinary invalid credentials and offline feedback |
+| Onboarding/profile/edit | Real profile save, refresh, logout; PNG upload/oversize rejection; draft marker added for safe updates |
+| Chats/DMs/groups | Three separate auth contexts, lists, message persistence, invitations, roles/privacy and retry paths |
+| Friends/search | Username search, requests, acceptance/removal and real HTTP state; transport simulations labeled |
+| Main calendar | Current month, today, 42-day grid, date dots, navigation, day sheet and personal creation |
+| Group calendar | Final accessible-selector repair passed real browser acceptance; invitations optional, RSVP controls and cancellation checked |
+| Conversation calendar/tabs | Native cards and chat-only tabs, consent, payments, immutable saved history |
+| Settings/appearance/security | Persisted light/dark/system, motion/text comfort, privacy, security, recovery and install entry points |
+| Calls | NOT IMPLEMENTED: legacy design shell; do not imply successful calling |
+| Recovery | Implemented service/integration boundary; physical device switching remains unverified |
+
+## Confirmed repairs
+
+Duplicate realtime clients on messaging/friends screens caused unnecessary sockets and made mocked notification targeting ambiguous. The notification inbox now consumes workspace reconciliation events there.
+
+The creation menu's animation-frame focus allowed rapid keyboard activation to close it again. Focus now moves immediately after the portal commits. Native hold/drag, cancellation, mouse, keyboard and reduced-motion journeys passed after that repair.
+
+Authentication errors previously cleared on blur and could move the submit button during a click. Corrected errors now clear while typing; the offline single-click submission test passed afterward.
+
+The group picker now uses an explicit label and unique ID rather than deriving its label from option content. Final isolated acceptance passed.
+
+Profile edits now mark unsaved state and active saves for the existing PWA update guard.
+
+## Accessibility and comfort evidence
+
+Browser coverage spans 301–1440 px in relevant suites; common navigation checks include 320, 360, 390, 430, 768, 1024, 1280 and 1440 px. Checks include 44 px navigation targets, overflow, keyboard focus, dialog Escape/return focus, reduced motion and viewport resizing.
+
+Appearance tests persist preferences through a reload and verify system colour-scheme changes and larger text without horizontal overflow. These do not replace physical screen-reader, iOS keyboard/safe-area or Xiaomi installation review.
+
+The approved MERKAT logo, orange #F55105 branding and five-position navigation remain. Tabs are not a main navigation destination.
+
+## Remaining audit work
+
+The final group-creation/calendar browser journey passed. Complete hosted acceptance; inspect any new errors rather than accepting empty states as successful queries. Review every dynamic control against the inventory and complete physical assistive-technology and installed-app checks. No exhaustive accessibility certification, Lighthouse score or battery measurement is claimed.

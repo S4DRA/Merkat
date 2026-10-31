@@ -1,3 +1,5 @@
+> Historical phase procedure. The current candidate requires all 15 migrations, recovery/appearance/calendar/tab schemas and operational reminder execution. Follow [current readiness](../../MERKAT_PRODUCTION_READINESS.md) and the final CI evidence before release.
+
 # Chats and groups production recovery
 
 October 30, 2026, Europe/Istanbul. Scope: the reported Retry states in chats/groups.

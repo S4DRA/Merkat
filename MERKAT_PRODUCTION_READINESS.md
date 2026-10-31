@@ -1,67 +1,66 @@
-# MERKAT production readiness
+# MERKAT production readiness — 31 October 2026
 
-October 30, 2026, Europe/Istanbul. Decision: **NO-GO for production deployment**. Source recovery, available local verification and handoff are completed; full release acceptance is blocked. No production deployment or infrastructure change was performed.
+Decision: DO NOT RELEASE YET. Production release is authorized by the owner after the required gates pass; the current gates have not passed.
+
+Cost constraint: FREE SERVICES ONLY. Do not upgrade plans or provision paid workers, branches or add-ons. The separate staging project was quoted at $0/month. Branching requires Pro and was not provisioned.
+
+## Current production
+
+Vercel project merkat, prj_ASSoFknfhPWidqclpEtXvTJ7jvit.
+Canonical observed alias: https://merkat-umber.vercel.app
+Current production deployment: dpl_BPQ4xQDRopDAwjcpKQXnogTBBxPp.
+Production commit: 6ea62ba1d04f7627914c30d198c2953ed955626e.
+
+Newer deployments are Preview deployments. No Preview was promoted and main was not merged or reset.
 
 ## Release gates
 
-| Gate                                              | State             | Required evidence before release                                                                                                                                   |
-| ------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Recover and preserve baseline                     | PASS              | Commit 466a2ac recovered cleanly; continuation branch and private source backup created. Final source includes recoverable Git history.                            |
-| Web/worker build, types, lint, native unit checks | PASS              | Evidence in MERKAT_TEST_RESULTS.md and source archive.                                                                                                             |
-| Exact migrations and selected SQL persistence     | PASS at SQL layer | Fourteen migrations and second-process persistence verified against native PostgreSQL.                                                                             |
-| Real API/Prisma/PostgreSQL integration            | BLOCKED           | Run the full suite on a host permitting loopback; investigate and fix all failures.                                                                                |
-| Real multi-user browser acceptance                | BLOCKED           | Run full Playwright against the isolated HTTPS app/database. No mocked HTTP component pass substitutes for this.                                                   |
-| Clean install and supply-chain review             | PENDING           | npm ci on a clean runner, dependency/security review and successful reproducible build.                                                                            |
-| Hosted private realtime                           | PENDING           | Separate staging Supabase setup, signed private channels, RLS and two/three-device reconnect/unread/receipt acceptance.                                            |
-| Matrix integration                                | INACTIVE          | No current functioning Matrix service. Decide separately if the project should migrate back; no Matrix delivery is certified.                                      |
-| Hosted reminder worker                            | PENDING           | Deploy only to authorized staging; configure supervision/restart, queue monitoring and failure recovery.                                                           |
-| Provider push acceptance                          | PENDING           | Staging HTTPS origin, VAPID keys and valid opt-in test subscriptions; inspect provider outcomes.                                                                   |
-| Actual device notification display                | PENDING           | Supported physical browsers/devices, including the user's Xiaomi 15T. Permission/background/OS battery restrictions can prevent display after provider acceptance. |
-| Accessibility and physical UX                     | PARTIAL           | Component controls/layout/focus pass. Full accessibility automation, screen reader and physical mobile/landscape tests remain.                                     |
-| Production rollout                                | NOT AUTHORIZED    | Separate owner authorization only after staging and rollback evidence.                                                                                             |
+| Gate | State |
+|---|---|
+| Existing source/history preserved and remotely backed up | PASS |
+| Current runtime dependency high/critical findings | PASS: runtime audit clean |
+| Real isolated PostgreSQL migrations/services | PASS in CI |
+| Final isolated browser and component acceptance | PASS: 61 browser tests, 40 component checks |
+| Production TLS configuration and authenticated Prisma query | BLOCKED |
+| Production backup and practical isolated restore | BLOCKED |
+| Production schema compatibility | FAIL: six of fifteen migrations applied |
+| Correct restricted runtime role and final grants on staging | INCOMPLETE |
+| Isolated staging HTTPS login, DM/group/calendar/tab journeys | BLOCKED |
+| Hosted private Broadcast with three real clients | BLOCKED |
+| Operational durable reminder execution and push | BLOCKED |
+| Physical mobile installation/device notification acceptance | NOT VERIFIED |
 
-## Keep notification stages separate
+## SSL diagnosis and required repair
 
-| Stage                       | Evidence                                           | Meaning                                                                                                                  |
-| --------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Scheduled                   | Pending durable PlanReminder row                   | Work is stored, not delivered.                                                                                           |
-| In-app notification created | Unique Notification row; reminder marked DELIVERED | Server created an inbox item. It does not establish browser/device receipt.                                              |
-| Push queued                 | PushDelivery row                                   | An opted-in session/device was selected for a send attempt.                                                              |
-| Provider accepted           | Successful web-push response, state ACCEPTED       | Push provider accepted the request; device display is not proved.                                                        |
-| Device displayed            | Observation on the actual target device            | Physical acceptance evidence. The application does not currently implement a display-acknowledgement telemetry protocol. |
+The reported exception is a configuration contradiction, raised before opening a database connection by packages/database/src/environment.ts.
 
-None of the local checks proves provider acceptance or device display. Missing VAPID config is verified to fail closed.
+With DATABASE_CA_CERT present, the existing DATABASE_URL must contain exactly one sslmode=verify-full and no sslrootcert. A remote production URL also cannot override host through a query parameter. packages/database/src/client.ts passes parsed connection fields and an explicit trusted CA with rejectUnauthorized=true to the Prisma PostgreSQL adapter.
 
-## Required isolated staging configuration
+The validator was not weakened. The trusted CA is parseable and not expired, but endpoint chain/name compatibility is not established. The actual Production URL is stored as a non-readable sensitive secret, so which conflicting parameter exists cannot be independently identified or safely rewritten here. Preserve its database, username, password, host and port when correcting only reviewed TLS parameters.
 
-- A separate private PostgreSQL/Supabase database with UTC timezone, reviewed migration history and verified TLS. An old preview sharing production data is not staging.
-- Exact HTTPS APP_ORIGIN, AUTH_RATE_LIMIT_SECRET and supported trusted ingress. Keep all database credentials and signing/private keys server-side. Do not manually pretend a public self-hosted ingress is Vercel.
-- Existing private Supabase Broadcast configuration: SUPABASE_REALTIME_URL, SUPABASE_PUBLISHABLE_KEY and server-only MERKAT_REALTIME_SIGNING_JWK, plus reviewed authorization/RLS setup.
-- A supervised worker built with shared packages and `npm run build -w @merkat/worker`, started with `npm start -w @merkat/worker`. Durable PostgreSQL jobs survive restarts; this behavior needs real concurrent service acceptance.
-- Optional MERKAT_PUSH_PUBLIC_KEY/PRIVATE_KEY/SUBJECT shared appropriately between web and worker. Generate keys privately. Web push requires HTTPS, service worker support and explicit user permission. Do not log or embed private keys in browser bundles.
-- If using `/api/internal/reminders` for in-app reminders, configure CRON_SECRET of at least 32 characters and a scheduler at least every minute. This does not replace the push worker. Monitor queue lateness, errors, retries and dead subscriptions.
+After secure configuration, verify a real restricted-role Prisma query and npm run db:check-runtime, then authenticated production requests and runtime logs. An empty recent log search or a successful build is insufficient.
 
-No staging service or paid resource was provisioned in this continuation. The source includes a manual isolated CI workflow ready for an authorized private repository/runner.
+## Database plan
 
-## Remaining acceptance sequence
+Production is ejsqjkstyrzddrxydrwq. Staging is sclhbqsprowujdmyonsc. Never run test suites against production.
 
-1. Run clean CI and all real service/browser tests. Verify at least three separately authenticated users. Fix resulting assertions or implementation errors, then rerun affected checks.
-2. Verify username/password registration with email blank, immediate login without verification, session cookie properties/rotation/revocation, password change, single-use recovery and account switching. Check persistent limits and safe errors.
-3. Upload real PNG/JPG below/at/above 2 MB, corrupted/mismatched files and oversized dimensions. Verify server response, normalized private storage, reload persistence, deletion, blocked/unrelated access and cache headers.
-4. Test DM/group history, sequence/dedupe, unread/read receipts, blocks, role changes, invitation acceptance, leaving/removal and reconnect using real private Supabase transport. Verify HTTP persistence independently from websocket delivery.
-5. Test personal/DM/group calendar creation, optional invitations, native cards/composer shortcuts, RSVP/subscription, all views, UTC/IANA/DST behavior, ICS, updates/cancellation and cross-client synchronization. Exercise version conflicts and privacy changes. There is no later invitee-management screen.
-6. With deterministic clocks in disposable service tests, verify both 24-hour and 5-hour due jobs. Run duplicate/concurrent workers, restart them, reschedule/cancel events, opt out/re-enable, remove participants and confirm no duplicate or stale inbox/push items. Never time-travel production data.
-7. Reproduce the 1,350 TRY example; verify individual/editable own orders, equal/quantity/custom splits, consent/decline, exact integer remainders, concurrent stale versions and idempotent retries. Distinguish consumption, venue payments and peer repayments. Confirm closed expense snapshots/history remain immutable and recipient confirmation is mandatory.
-8. Test real notification permissions, no config, permission denied, expired endpoints, retry/restart, opt-out/logout/account switching, deep links and foreground/background behavior on physical devices. Record provider acceptance separately from observed device display.
-9. Review keyboard navigation, focus trap/return, larger text, OS theme changes, reduced motion, contrast, screen readers, long content and physical mobile safe areas. Component tests do not certify complete accessibility.
-10. Establish observability, retention/capacity, a backup/restore rehearsal and a reviewed rollout/rollback plan. Production migrations are forward changes; rollback must account for existing data. Obtain explicit production authorization afterward.
+Before production DDL: obtain and validate a restorable backup, record migration checksums/state and existing-data counts privately, and rehearse the upgrade on an isolated restoration. All nine pending migrations require review, not merely the earlier groups migration. Apply through the privileged migration connection, then the reviewed Supabase runtime permission/invalidation setup. Normal requests must use merkat_runtime, not postgres or a migration owner.
 
-## Functional limits
+The migrations are mainly additive, but include foreign keys, backfill/subscription changes and immutable-history triggers. Review existing rows, lock duration, defaults and old/new writer compatibility before rollout. Do not migrate during application startup/build. Do not reverse migrations destructively.
 
-No silent editing of confirmed shared expenses, no closed-expense reopening/unanimous correction workflow, no automated taxes/discounts/refunds, no external money transfer, no recurring-event editor, no calls/media messaging and no active Matrix/phone system. These are documented limits rather than hidden functioning controls. Do not advertise them as supported.
+## Hosted setup still required
 
-## Handoff and recovery
+- Complete Supabase's confirmation for staging group/privacy grants. It expired twice; no attempt was made to evade confirmation.
+- The recovery branch now has its own sensitive staging DATABASE_URL, AUTH_RATE_LIMIT_SECRET and CA. Verify a real authenticated Prisma connection; the earlier global Preview environment lacked these values.
+- The recovery branch now overrides realtime URL/publishable key with the separate staging project. Import its signing key before hosted Broadcast testing. Other generic Preview scopes originally shared production realtime settings.
+- Import/verify the authorized ES256 signing key and private Broadcast configuration. No Supabase Auth replacement.
+- Configure an authorized free scheduled execution path or free persistent worker and prove queue health, retries, cancellation and restart behavior. A Vercel handler is not an always-running worker.
+- Supply push configuration only if physical delivery will be tested; distinguish an inbox record, provider acceptance, and actual display.
 
-The downloadable source ZIP contains reports, textual check evidence, revision metadata and `MERKAT_HISTORY.bundle`. To restore Git history in a new private directory, use `git clone MERKAT_HISTORY.bundle merkat` and select `new-chat/work/merkat-audit`. Inspect `SOURCE_REVISION.txt` for the final snapshot revision. This creates a new recovery checkout without touching the existing one.
+A protected staging build is READY at https://merkat-rhkffbdcu-s4dras-projects.vercel.app (dpl_DmVuj5EnWw5ZFN85J7e3NA6u5Wvc). Its API target is staging; it has not passed authenticated acceptance. Automatic review rejected creating a bearer share link. Use authorized private SSO access, or obtain explicit owner approval before making a share link. Do not disable Deployment Protection.
 
-Do not publish the archive or bundle to a public repository automatically. The original source checkout and public production app remain unchanged.
+## Rollout and rollback
+
+Release only the reviewed development-plus-repair candidate after all critical gates pass. Use the existing GitHub/Vercel project and production environment. Verify the actual production commit, aliases, restricted-role health, real owner login, existing conversation reads and safe authorized writes. Monitor errors and queue health.
+
+Keep dpl_BPQ4xQDRopDAwjcpKQXnogTBBxPp available for application rollback. Confirm the old application remains compatible with applied schema changes before switching traffic back. Preserve data and additive schema; never automatically down-migrate or reset production.

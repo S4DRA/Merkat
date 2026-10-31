@@ -1,21 +1,32 @@
-# MERKAT PWA verification
+# MERKAT PWA verification — 31 October 2026
 
-October 30, 2026. Scope: existing production-revision PWA assets/install UI preserved
-during the chat/group database repair. No PWA features or logo assets were changed.
+Classification: IMPLEMENTED BUT NOT FULLY VERIFIED.
 
-| Requirement                        | Finding                                                                                                                             |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Manifest                           | Existing `manifest.ts`: id/scope/start URL `/`, standalone, brand colors, name/short name `Merkat`                                  |
-| Approved branding                  | Existing 192/512 PNG, favicon and 180 Apple icon retained                                                                           |
-| Install UI                         | Existing deferred install event, manual platform guidance and standalone hiding                                                     |
-| Automated installation evidence    | Existing browser tests exercise synthetic install events and manifest/icon resolution; synthetic events are not actual installation |
-| Maskable icon                      | NOT IMPLEMENTED in current revision; both declared icons use purpose `any`                                                          |
-| Offline/update service worker      | NOT IMPLEMENTED in deployed revision; existing browser test expects no service worker/cache registrations                           |
-| Push/reminders                     | NOT LIVE-VERIFIED; richer implementation is in the separate recovered checkout                                                      |
-| Android/Xiaomi/iPhone installation | BLOCKED on physical-device acceptance; no physical installation claimed                                                             |
-| Hosted account/session reopening   | NOT LIVE-VERIFIED in this incident repair                                                                                           |
+## Implemented and browser-checked
 
-The attached full mobile PWA acceptance is not satisfied by the deployed
-`6ea62ba` source. It is separate from restoring the database schema expected by
-the current chat/group code. See `MERKAT_TEST_RESULTS.md` for the current run's
-browser results; no historic recovered-candidate pass counts are reused.
+The manifest identifies MERKAT, uses standalone display, root start URL/scope, orange theme colour, 192/512 PNG icons and a maskable declaration. Apple touch and favicon assets exist and decode at their declared dimensions. The approved 512 icon was visually inspected; its white symbol is padded inside the orange square.
+
+The production service worker caches public icons, branding, static bundles and the offline page. Authenticated HTML is network-only; API JSON, avatars, calendar and financial data are not cached. Offline navigation displays the fallback rather than private conversation content.
+
+Install UI uses the browser's deferred install event when available and shows manual Android/iOS guidance otherwise. It does not report a physical installation based on a synthetic browser event.
+
+Updates require an explicit action. The guard checks active dialogs, writes, message drafts and dirty forms. Profile forms now mark dirty state. Logout requests notification closure, and a delayed push must verify the currently signed-in recipient through a network-only request before displaying private content.
+
+## Evidence boundary
+
+CI browser tests parse the manifest, register the actual service worker in a secure local HTTPS harness, inspect cache names/contents and navigate offline. Unit tests exercise account switch/logout/offline push suppression and private cache exclusion.
+
+The local TLS fixture is explicitly a test certificate; Chromium's certificate exception is confined to the loopback test harness. Production database TLS verification is unchanged.
+
+The install prompt test uses synthetic install events. It is UI verification, not Android/iOS installation proof. No successful provider push or device display is claimed.
+
+## Still required
+
+- Actual install/launch on Android, Xiaomi and iOS, standalone deep links and device safe areas.
+- Logout, reopen, account switching and session expiration in an installed application.
+- A real update with an open draft, intentional activation, reload and new assets.
+- Physical keyboard/viewport behavior, large text, screen readers and reduced motion.
+- Push subscription, provider acceptance, actual device display and stale-recipient suppression on real devices.
+- HTTPS staging and production verification after secure database/realtime configuration.
+
+Screenshot publication from authenticated test pages was rejected by automatic review. No replacement egress path was used. The CI capture code leaves images local to its disposable runner.

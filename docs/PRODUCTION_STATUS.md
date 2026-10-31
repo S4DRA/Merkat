@@ -1,3 +1,5 @@
+> Current recovery evidence: [MERKAT_TEST_RESULTS.md](../MERKAT_TEST_RESULTS.md), CI run 41208292200. Isolated checks pass; hosted/production acceptance remains blocked. See [release report](../MERKAT_RELEASE_REPORT.md) for the protected free staging build and exact remaining gates.
+
 # Merkat implementation and release status
 
 Continuation handoff: the root-level `MERKAT_IMPLEMENTATION_REPORT.md`, `MERKAT_TEST_RESULTS.md` and `MERKAT_PRODUCTION_READINESS.md` supersede this initial implementation report. The evidence below records the earlier 466a2ac pass; the continuation includes additional checks and explicit remaining blockers.
