@@ -19,6 +19,7 @@ try {
       "tests/integration/groups-privacy.test.ts",
       "tests/integration/production-recovery.test.ts",
       "tests/integration/database-connections.test.ts",
+      "tests/integration/database-tls.test.ts",
       "tests/integration/list-http-recovery.test.ts",
       "tests/integration/local-runtime.test.ts",
       "tests/integration/collaboration.test.ts",

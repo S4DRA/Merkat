@@ -7,7 +7,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { requireTestLoopback } from "./loopback.js";
 
-export async function startTestDatabase(options: { migrate?: boolean } = {}) {
+export async function startTestDatabase(
+  options: {
+    migrate?: boolean;
+    tls?: { certificate: string; key: string };
+  } = {},
+) {
   await requireTestLoopback();
   const root = resolve("artifacts", "postgres");
   const databaseDir = resolve(root, randomUUID());
@@ -37,7 +42,22 @@ export async function startTestDatabase(options: { migrate?: boolean } = {}) {
     persistent: false,
     authMethod: "scram-sha-256",
     // Prisma's pg adapter serializes UTC wall time; match Supabase's default UTC server timezone.
-    postgresFlags: ["-h", "127.0.0.1", "-c", "timezone=UTC"],
+    postgresFlags: [
+      "-h",
+      "127.0.0.1",
+      "-c",
+      "timezone=UTC",
+      ...(options.tls
+        ? [
+            "-c",
+            "ssl=on",
+            "-c",
+            `ssl_cert_file=${options.tls.certificate}`,
+            "-c",
+            `ssl_key_file=${options.tls.key}`,
+          ]
+        : []),
+    ],
     onLog: () => {},
     onError: (error) =>
       console.error(String(error).replaceAll(password, "[redacted]")),
