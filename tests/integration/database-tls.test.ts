@@ -37,10 +37,11 @@ test("Prisma PostgreSQL verifies the configured CA and server identity over real
     return { certificate: cert, key, ca: await readFile(cert, "utf8") };
   }
   try {
-    const trusted = await certificate("trusted", "IP:127.0.0.1");
+    const trusted = await certificate("trusted", "DNS:localhost");
     const other = await certificate("other", "DNS:wrong.example.test");
     const cluster = await startTestDatabase({ migrate: false, tls: trusted });
     const url = new URL(cluster.url);
+    url.hostname = "localhost";
     url.searchParams.set("sslmode", "verify-full");
     const environment = {
       NODE_ENV: "production",
@@ -101,6 +102,7 @@ test("Prisma PostgreSQL verifies the configured CA and server identity over real
           tls: other,
         });
         const target = new URL(mismatch.url);
+        target.hostname = "localhost";
         target.searchParams.set("sslmode", "verify-full");
         const client = createDatabase({
           ...environment,

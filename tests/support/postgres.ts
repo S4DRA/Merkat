@@ -44,7 +44,7 @@ export async function startTestDatabase(
     // Prisma's pg adapter serializes UTC wall time; match Supabase's default UTC server timezone.
     postgresFlags: [
       "-h",
-      "127.0.0.1",
+      options.tls ? "localhost" : "127.0.0.1",
       "-c",
       "timezone=UTC",
       ...(options.tls
