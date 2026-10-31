@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { ChatScope, GroupList } from "@merkat/contracts";
 import { Button } from "../ui/primitives";
 import { directRequest, directError } from "../../lib/direct-client";
@@ -8,6 +8,7 @@ export function GroupDestinationPicker({
 }: {
   onChange: (scope: ChatScope | undefined) => void;
 }) {
+  const id = useId();
   const [groups, setGroups] = useState<GroupList["groups"]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -44,35 +45,34 @@ export function GroupDestinationPicker({
   }, [attempt]);
   return (
     <>
-      <label>
-        Share with group
-        <select
-          required
-          defaultValue=""
-          disabled={loading}
-          onChange={(event) => {
-            const group = groups.find((g) => g.id === event.target.value);
-            onChange(
-              group
-                ? {
-                    kind: "GROUP",
-                    id: group.id,
-                    channelId: group.defaultChannelId,
-                  }
-                : undefined,
-            );
-          }}
-        >
-          <option value="">
-            {loading ? "Loading your groups…" : "Choose a group"}
+      <label htmlFor={id}>Share with group</label>
+      <select
+        id={id}
+        required
+        defaultValue=""
+        disabled={loading}
+        onChange={(event) => {
+          const group = groups.find((g) => g.id === event.target.value);
+          onChange(
+            group
+              ? {
+                  kind: "GROUP",
+                  id: group.id,
+                  channelId: group.defaultChannelId,
+                }
+              : undefined,
+          );
+        }}
+      >
+        <option value="">
+          {loading ? "Loading your groups…" : "Choose a group"}
+        </option>
+        {groups.map((group) => (
+          <option key={group.id} value={group.id}>
+            {group.name}
           </option>
-          {groups.map((group) => (
-            <option key={group.id} value={group.id}>
-              {group.name}
-            </option>
-          ))}
-        </select>
-      </label>
+        ))}
+      </select>
       <small>
         The invitation will be shared in the selected group’s default channel.
         Members choose whether to join.
